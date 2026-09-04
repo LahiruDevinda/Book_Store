@@ -534,3 +534,42 @@ async function refreshWishlist() {
         }
     }
 }
+
+function renderWishlistUI(count) {
+    const badge = document.getElementById('wishlistBadge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    const container = document.getElementById('wishlistDrawerItems');
+    if (!container) return;
+
+    if (state.activeWishlist.length === 0) {
+        container.innerHTML = `
+            <div class="drawer-empty">
+                <div class="drawer-empty-icon">🤍</div>
+                <div style="font-weight:600; font-size:15px; margin-bottom:4px;">Your wishlist is empty</div>
+                <div style="font-size:13px;">Save books to read later.</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = state.activeWishlist.map(item => `
+        <div class="drawer-item">
+            <img src="${item.coverImageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80'}" alt="${escapeHtml(item.title)}" class="drawer-item-thumb">
+            <div class="drawer-item-info">
+                <div>
+                    <div class="drawer-item-title">${escapeHtml(item.title)}</div>
+                    <div class="drawer-item-price">$${Number(item.price).toFixed(2)}</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <button class="btn btn-secondary btn-sm" onclick="moveToCart(${item.bookid})">+ Add to Cart</button>
+                    <button class="drawer-item-remove" onclick="toggleWishlist(${item.bookid})">Remove</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
