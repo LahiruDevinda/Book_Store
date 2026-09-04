@@ -57,3 +57,68 @@ if ($action === 'get_books') {
 
     sendJsonResponse(['success' => true, 'books' => $books]);
 }
+
+// ======================== ADD NEW BOOK ========================
+if ($action === 'add_book') {
+    $title = trim($input['title'] ?? '');
+    $isbn = trim($input['ISBN'] ?? '');
+    $price = (float)($input['price'] ?? 0);
+    $stock = (int)($input['stockQuantity'] ?? 0);
+    $cover = trim($input['coverImageUrl'] ?? '');
+    $authorIds = $input['authorIds'] ?? [];
+    $genreIds = $input['genreIds'] ?? [];
+
+    if (empty($title) || empty($isbn) || $price <= 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Title, ISBN, and positive price are required.'], 400);
+    }
+
+    // Check duplicate ISBN
+    $chk = $pdo->prepare("SELECT bookid FROM Book WHERE ISBN = ?");
+    $chk->execute([$isbn]);
+    if ($chk->fetch()) {
+        sendJsonResponse(['success' => false, 'message' => 'A book with this ISBN already exists.'], 409);
+    }
+
+    if (empty($cover)) {
+        $cover = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80';
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        $stmt = $pdo->prepare("INSERT INTO Book (title, ISBN, price, stockQuantity, coverImageUrl) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $isbn, $price, $stock, $cover]);
+        $bookId = (int)$pdo->lastInsertId();
+
+        // Bridge Table: Book_Author
+        if (!empty($authorIds) && is_array($authorIds)) {
+            $stmtBA = $pdo->prepare("INSERT IGNORE INTO Book_Author (bookid, authorid) VALUES (?, ?)");
+            foreach ($authorIds as $aid) {
+                $aid = (int)$aid;
+                if ($aid > 0) {
+                    $stmtBA->execute([$bookId, $aid]);
+                }
+            }
+        }
+
+        // Bridge Table: Book_Genre
+        if (!empty($genreIds) && is_array($genreIds)) {
+            $stmtBG = $pdo->prepare("INSERT IGNORE INTO Book_Genre (bookid, genreid) VALUES (?, ?)");
+            foreach ($genreIds as $gid) {
+                $gid = (int)$gid;
+                if ($gid > 0) {
+                    $stmtBG->execute([$bookId, $gid]);
+                }
+            }
+        }
+
+        $pdo->commit();
+
+        sendJsonResponse(['success' => true, 'message' => 'Book added successfully!', 'bookid' => $bookId]);
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        sendJsonResponse(['success' => false, 'message' => 'Failed to add book: ' . $e->getMessage()], 500);
+    }
+}
