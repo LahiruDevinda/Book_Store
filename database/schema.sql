@@ -1,0 +1,132 @@
+CREATE DATABASE IF NOT EXISTS bookstore_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE bookstore_db;
+
+CREATE TABLE IF NOT EXISTS Users (
+    userid INT AUTO_INCREMENT PRIMARY KEY,
+    firstName VARCHAR(50) NOT NULL,
+    lastName VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    isAdmin BOOLEAN DEFAULT FALSE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Book (
+    bookid INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    ISBN VARCHAR(20) UNIQUE NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    stockQuantity INT DEFAULT 0,
+    coverImageUrl VARCHAR(255)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Author (
+    authorid INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    biography TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Genre (
+    genreid INT AUTO_INCREMENT PRIMARY KEY,
+    genreName VARCHAR(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS AddressBook (
+    addressid INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NOT NULL,
+    no VARCHAR(20) NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    zipCode VARCHAR(20) NOT NULL,
+    FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Cart (
+    cartid INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT UNIQUE NOT NULL,
+    FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS PromoCode (
+    promoCodeld INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    type VARCHAR(50) NOT NULL, -- e.g., 'percentage', 'fixed'
+    price DECIMAL(10,2) NOT NULL,
+    isValid BOOLEAN DEFAULT TRUE,
+    exp_date DATE NOT NULL,
+    FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Orders (
+    orderid INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NOT NULL,
+    addressid INT NOT NULL,
+    promoCodeld INT NULL,
+    subTotal DECIMAL(10,2) NOT NULL,
+    orderStatus VARCHAR(50) DEFAULT 'Pending',
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userid) REFERENCES Users(userid),
+    FOREIGN KEY (addressid) REFERENCES AddressBook(addressid),
+    FOREIGN KEY (promoCodeld) REFERENCES PromoCode(promoCodeld)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Payment (
+    paymentId INT AUTO_INCREMENT PRIMARY KEY,
+    orderid INT UNIQUE NOT NULL,
+    method ENUM('COD', 'card') NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    FOREIGN KEY (orderid) REFERENCES Orders(orderid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Review (
+    reviewld INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NOT NULL,
+    bookid INT NOT NULL,
+    rate INT CHECK (rate >= 1 AND rate <= 5),
+    review TEXT,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userid) REFERENCES Users(userid),
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Book_Author (
+    bookid INT,
+    authorid INT,
+    PRIMARY KEY (bookid, authorid),
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE,
+    FOREIGN KEY (authorid) REFERENCES Author(authorid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Book_Genre (
+    bookid INT,
+    genreid INT,
+    PRIMARY KEY (bookid, genreid),
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE,
+    FOREIGN KEY (genreid) REFERENCES Genre(genreid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Wishlist (
+    userid INT,
+    bookid INT,
+    PRIMARY KEY (userid, bookid),
+    FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE,
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Cart_Item (
+    cartid INT,
+    bookid INT,
+    quantity INT DEFAULT 1,
+    PRIMARY KEY (cartid, bookid),
+    FOREIGN KEY (cartid) REFERENCES Cart(cartid) ON DELETE CASCADE,
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Order_Item (
+    orderid INT,
+    bookid INT,
+    unitPrice DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    PRIMARY KEY (orderid, bookid),
+    FOREIGN KEY (orderid) REFERENCES Orders(orderid) ON DELETE CASCADE,
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
