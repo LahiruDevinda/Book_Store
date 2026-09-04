@@ -177,3 +177,19 @@ assertCondition(!$hasJohnInIndex, "Storefront UI strictly does not expose demo c
 assertCondition(!$hasAdminCredsInIndex, "Storefront UI strictly does not expose demo admin credentials");
 assertCondition(!$hasTechBadgesInIndex, "Storefront UI strictly does not display used languages / tech stack badges");
 
+$pdo->prepare("DELETE FROM Order_Item WHERE orderid = ?")->execute([$orderId]);
+$pdo->prepare("DELETE FROM Orders WHERE orderid = ?")->execute([$orderId]);
+$pdo->prepare("DELETE FROM PromoCode WHERE userid = ?")->execute([$testUserId]);
+$pdo->prepare("DELETE FROM AddressBook WHERE userid = ?")->execute([$testUserId]);
+$pdo->prepare("DELETE FROM Wishlist WHERE userid = ?")->execute([$testUserId]);
+$pdo->prepare("DELETE FROM Review WHERE userid = ?")->execute([$testUserId]);
+$pdo->prepare("DELETE FROM Cart WHERE userid = ?")->execute([$testUserId]);
+$pdo->prepare("DELETE FROM Users WHERE userid = ?")->execute([$testUserId]);
+
+echo "\n======================================================\n";
+echo "  TEST SUMMARY: $passed Passed, $failed Failed\n";
+echo "======================================================\n";
+
+if ($failed > 0) {
+    exit(1);
+}
