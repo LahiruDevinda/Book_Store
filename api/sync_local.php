@@ -38,6 +38,23 @@ try {
     $mergedCartCount = 0;
     $mergedWishlistCount = 0;
 
+    $stmtWishlist = $pdo->prepare("INSERT IGNORE INTO Wishlist (userid, bookid) VALUES (?, ?)");
+    if (is_array($guestWishlist)) {
+        foreach ($guestWishlist as $item) {
+            $bookId = is_array($item) ? (int)($item['bookid'] ?? 0) : (int)$item;
+            if ($bookId > 0) {
+                $chkBook = $pdo->prepare("SELECT bookid FROM Book WHERE bookid = ?");
+                $chkBook->execute([$bookId]);
+                if ($chkBook->fetch()) {
+                    $stmtWishlist->execute([$userId, $bookId]);
+                    if ($stmtWishlist->rowCount() > 0) {
+                        $mergedWishlistCount++;
+                    }
+                }
+            }
+        }
+    }
+
 } catch (Exception $e) {
 
 }
