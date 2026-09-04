@@ -117,3 +117,5 @@ if ($action === 'toggle') {
         'message'    => $msg
     ]);
 }
+
+sendJsonResponse(['success' => false, 'message' => 'Invalid action.'], 400);
