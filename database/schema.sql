@@ -76,3 +76,14 @@ CREATE TABLE IF NOT EXISTS Payment (
     status VARCHAR(50) DEFAULT 'Pending',
     FOREIGN KEY (orderid) REFERENCES Orders(orderid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Review (
+    reviewld INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NOT NULL,
+    bookid INT NOT NULL,
+    rate INT CHECK (rate >= 1 AND rate <= 5),
+    review TEXT,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userid) REFERENCES Users(userid),
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
