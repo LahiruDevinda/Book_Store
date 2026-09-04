@@ -11,3 +11,10 @@ $userId = (int)$_SESSION['user']['userid'];
 $pdo = getDBConnection();
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'GET') {
+    $stmt = $pdo->prepare("SELECT addressid, no, street, zipCode FROM AddressBook WHERE userid = ? ORDER BY addressid DESC");
+    $stmt->execute([$userId]);
+    $addresses = $stmt->fetchAll();
+    sendJsonResponse(['success' => true, 'addresses' => $addresses]);
+}
