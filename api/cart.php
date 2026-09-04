@@ -210,3 +210,18 @@ if ($action === 'update') {
         sendJsonResponse(['success' => true, 'message' => 'Cart updated.']);
     }
 }
+
+if ($action === 'remove') {
+    $bookId = (int)($input['bookid'] ?? 0);
+    $stmt = $pdo->prepare("DELETE FROM Cart_Item WHERE cartid = ? AND bookid = ?");
+    $stmt->execute([$cartId, $bookId]);
+    sendJsonResponse(['success' => true, 'message' => 'Item removed from cart.']);
+}
+
+if ($action === 'clear') {
+    $stmt = $pdo->prepare("DELETE FROM Cart_Item WHERE cartid = ?");
+    $stmt->execute([$cartId]);
+    sendJsonResponse(['success' => true, 'message' => 'Cart cleared.']);
+}
+
+sendJsonResponse(['success' => false, 'message' => 'Invalid action.'], 400);
