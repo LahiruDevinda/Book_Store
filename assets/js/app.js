@@ -597,3 +597,57 @@ function handleProceedToCheckout() {
     openCheckoutModal();
 }
 
+// ======================== CHECKOUT MODAL FLOW ========================
+async function openCheckoutModal() {
+    const modal = document.getElementById('checkoutModal');
+    if (!modal) return;
+
+    state.appliedPromo = null;
+    modal.classList.remove('hidden');
+
+    await loadAddresses();
+    renderCheckoutSummary();
+}
+
+async function loadAddresses() {
+    const container = document.getElementById('checkoutAddressList');
+    if (!container) return;
+
+    try {
+        const res = await fetch('api/addresses.php');
+        const data = await res.json();
+        if (data.success && data.addresses && data.addresses.length > 0) {
+            state.selectedAddressId = data.addresses[0].addressid;
+            container.innerHTML = data.addresses.map((a, idx) => `
+                <label style="display:flex; align-items:flex-start; gap:10px; padding:10px; border:1px solid var(--border-color); border-radius:var(--radius-sm); margin-bottom:8px; cursor:pointer;">
+                    <input type="radio" name="selectedAddress" value="${a.addressid}" ${idx === 0 ? 'checked' : ''} onchange="state.selectedAddressId = ${a.addressid}">
+                    <div style="font-size:13px; line-height:1.4;">
+                        <strong>${escapeHtml(a.no)}, ${escapeHtml(a.street)}</strong>
+                        <div style="color:var(--text-muted);">Postal Code: ${escapeHtml(a.zipCode)}</div>
+                    </div>
+                </label>
+            `).join('') + `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleNewAddressForm()" style="margin-top:6px;">+ Add Different Address</button>
+            `;
+        } else {
+            state.selectedAddressId = null;
+            container.innerHTML = `
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">No addresses saved yet. Please enter your delivery address:</div>
+            `;
+            document.getElementById('newAddressFields').style.display = 'block';
+        }
+    } catch (e) {
+        console.error('Failed to load addresses', e);
+    }
+}
+
+window.toggleNewAddressForm = function() {
+    const fields = document.getElementById('newAddressFields');
+    if (fields) {
+        fields.style.display = fields.style.display === 'none' ? 'block' : 'none';
+        if (fields.style.display === 'block') {
+            state.selectedAddressId = null;
+            document.querySelectorAll('input[name="selectedAddress"]').forEach(r => r.checked = false);
+        }
+    }
+};
