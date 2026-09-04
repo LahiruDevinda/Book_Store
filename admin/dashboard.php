@@ -91,7 +91,23 @@ $adminUser = $_SESSION['user'];
   </header>
 
   <!-- Admin Main Content -->
-  <main class="container admin-container"></main>
+  <main class="container admin-container">
+
+    <!-- Notification Banner -->
+    <div id="adminAlert" class="alert-box hidden"></div>
+
+    <!-- ==================== OVERVIEW TAB ==================== -->
+    <section id="tab-overview" class="admin-panel active"></section>
+
+    <!-- ==================== INVENTORY TAB ==================== -->
+    <section id="tab-inventory" class="admin-panel"></section>
+
+    <!-- ==================== ORDERS AUDIT TAB ==================== -->
+    <section id="tab-orders" class="admin-panel"></section>
+
+    <!-- ==================== AUTHORS & GENRES TAB ==================== -->
+    <section id="tab-taxonomies" class="admin-panel"></section>
+  </main>
 
   <!-- Add New Book -->
   <div id="addBookModal" class="modal-overlay hidden"></div>
