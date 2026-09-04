@@ -18,3 +18,32 @@ if ($method === 'GET') {
     $addresses = $stmt->fetchAll();
     sendJsonResponse(['success' => true, 'addresses' => $addresses]);
 }
+
+if ($method === 'POST') {
+    $rawInput = file_get_contents('php://input');
+    $input = json_decode($rawInput, true) ?: $_POST;
+
+    $no = trim($input['no'] ?? '');
+    $street = trim($input['street'] ?? '');
+    $zipCode = trim($input['zipCode'] ?? '');
+
+    if (empty($no) || empty($street) || empty($zipCode)) {
+        sendJsonResponse(['success' => false, 'message' => 'Please provide unit number, street address, and postal code.'], 400);
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO AddressBook (userid, no, street, zipCode) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$userId, $no, $street, $zipCode]);
+    $addressId = (int)$pdo->lastInsertId();
+
+    sendJsonResponse([
+        'success'   => true,
+        'message'   => 'Address saved successfully.',
+        'addressid' => $addressId,
+        'address'   => [
+            'addressid' => $addressId,
+            'no'        => $no,
+            'street'    => $street,
+            'zipCode'   => $zipCode
+        ]
+    ]);
+}
