@@ -291,7 +291,9 @@ $adminUser = $_SESSION['user'];
   </div>
 
   <!-- Edit Book Modal -->
-  <div id="editBookModal" class="modal-overlay hidden"></div>
+  <div id="editBookModal" class="modal-overlay hidden">
+    <div class="modal-dialog" style="max-width:400px;"></div>
+  </div>
 </body>
 
 </html>
