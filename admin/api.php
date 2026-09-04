@@ -164,3 +164,9 @@ if ($action === 'delete_book') {
         sendJsonResponse(['success' => false, 'message' => 'Failed to delete book: ' . $e->getMessage()], 500);
     }
 }
+
+// ======================== GET / ADD AUTHORS ========================
+if ($action === 'get_authors') {
+    $stmt = $pdo->query("SELECT authorid, name, biography FROM Author ORDER BY name ASC");
+    sendJsonResponse(['success' => true, 'authors' => $stmt->fetchAll()]);
+}
