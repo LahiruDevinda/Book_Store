@@ -199,3 +199,33 @@ async function loadOrders() {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Failed to load orders.</td></tr>';
     }
 }
+
+// ======================== TAXONOMIES ========================
+let cachedAuthors = [];
+let cachedGenres = [];
+
+async function loadTaxonomies() {
+    try {
+        const [authRes, genRes] = await Promise.all([
+            fetch('api.php?action=get_authors'),
+            fetch('api.php?action=get_genres')
+        ]);
+        const authData = await authRes.json();
+        const genData = await genRes.json();
+
+        if (authData.success) {
+            cachedAuthors = authData.authors;
+            renderAuthorsList();
+            renderModalAuthors();
+        }
+
+        if (genData.success) {
+            cachedGenres = genData.genres;
+            renderGenresList();
+            renderModalGenres();
+        }
+    } catch (e) {
+        console.error('Failed to load taxonomies', e);
+    }
+}
+
