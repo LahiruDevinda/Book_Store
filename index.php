@@ -103,3 +103,41 @@ if ($genreId > 0) {
 if (!empty($where)) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
+
+$sql .= " GROUP BY b.bookid";
+
+switch ($sort) {
+    case 'price_asc':
+        $sql .= " ORDER BY b.price ASC";
+        break;
+    case 'price_desc':
+        $sql .= " ORDER BY b.price DESC";
+        break;
+    case 'rating':
+        $sql .= " ORDER BY avgRating DESC, reviewCount DESC";
+        break;
+    case 'title':
+        $sql .= " ORDER BY b.title ASC";
+        break;
+    case 'featured':
+    default:
+        $sql .= " ORDER BY b.bookid ASC";
+        break;
+}
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$books = $stmt->fetchAll();
+
+foreach ($books as &$book) {
+    $book['price'] = (float)$book['price'];
+    $book['stockQuantity'] = (int)$book['stockQuantity'];
+    $book['avgRating'] = round((float)$book['avgRating'], 1);
+    $book['reviewCount'] = (int)$book['reviewCount'];
+}
+
+sendJsonResponse([
+    'success' => true,
+    'count'   => count($books),
+    'books'   => $books
+]);
