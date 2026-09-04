@@ -166,3 +166,36 @@ async function performGuestSync() {
     }
 }
 
+// ======================== CATALOG & SEARCH ========================
+async function loadGenres() {
+    try {
+        const res = await fetch('api/books.php?action=genres');
+        const data = await res.json();
+        if (data.success && data.genres) {
+            state.genres = data.genres;
+            renderGenrePills();
+        }
+    } catch (e) {
+        console.error('Error loading genres', e);
+    }
+}
+
+function renderGenrePills() {
+    const track = document.getElementById('genreFilterTrack');
+    if (!track) return;
+
+    let html = `<button class="genre-pill ${state.currentGenre === 0 ? 'active' : ''}" data-id="0">All Books</button>`;
+    state.genres.forEach(g => {
+        html += `<button class="genre-pill ${state.currentGenre === g.genreid ? 'active' : ''}" data-id="${g.genreid}">${escapeHtml(g.genreName)}</button>`;
+    });
+    track.innerHTML = html;
+
+    track.querySelectorAll('.genre-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.currentGenre = parseInt(btn.dataset.id);
+            track.querySelectorAll('.genre-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadBooks();
+        });
+    });
+}
