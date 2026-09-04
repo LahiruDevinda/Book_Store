@@ -651,3 +651,71 @@ window.toggleNewAddressForm = function() {
         }
     }
 };
+
+function renderCheckoutSummary() {
+    const itemsEl = document.getElementById('checkoutItemsReview');
+    const subtotalEl = document.getElementById('checkoutSubtotal');
+    const discountRow = document.getElementById('checkoutDiscountRow');
+    const discountEl = document.getElementById('checkoutDiscount');
+    const totalEl = document.getElementById('checkoutFinalTotal');
+
+    let subTotal = 0;
+    state.activeCart.forEach(item => {
+        subTotal += item.price * item.quantity;
+    });
+
+    if (itemsEl) {
+        itemsEl.innerHTML = state.activeCart.map(item => `
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid var(--border-color);">
+                <div>
+                    <strong>${escapeHtml(item.title)}</strong> &times; ${item.quantity}
+                </div>
+                <div>$${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+        `).join('');
+    }
+
+    if (subtotalEl) subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
+
+    let discount = 0;
+    if (state.appliedPromo) {
+        if (state.appliedPromo.type.toLowerCase() === 'percentage') {
+            discount = subTotal * (state.appliedPromo.price / 100);
+        } else {
+            discount = Math.min(subTotal, state.appliedPromo.price);
+        }
+        discount = Math.round(discount * 100) / 100;
+        if (discountRow) discountRow.style.display = 'flex';
+        if (discountEl) discountEl.textContent = `−$${discount.toFixed(2)} (${state.appliedPromo.code})`;
+    } else {
+        if (discountRow) discountRow.style.display = 'none';
+    }
+
+    const finalTotal = Math.max(0, subTotal - discount);
+    if (totalEl) totalEl.textContent = `$${finalTotal.toFixed(2)}`;
+}
+
+// Validate Promo Code in Checkout
+async function applyPromoCode() {
+    const input = document.getElementById('checkoutPromoInput');
+    const code = input ? input.value.trim().toUpperCase() : '';
+    if (!code) return;
+
+    try {
+        const res = await fetch('api/checkout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'validate_promo', code: code })
+        });
+        const data = await res.json();
+        if (data.success && data.promo) {
+            state.appliedPromo = data.promo;
+            showToast('Promo code applied!');
+            renderCheckoutSummary();
+        } else {
+            showToast(data.message || 'Invalid promo code.', 'error');
+        }
+    } catch (e) {
+        showToast('Error validating promo code.', 'error');
+    }
+}
