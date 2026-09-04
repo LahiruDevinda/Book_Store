@@ -42,7 +42,6 @@ function setupTabs() {
   });
 }
 
-
 // Display an alert message in the admin dashboard
 function showAdminAlert(msg, type = 'success') {
   const alert = document.getElementById('adminAlert');
@@ -53,4 +52,20 @@ function showAdminAlert(msg, type = 'success') {
   setTimeout(() => {
     alert.classList.add('hidden');
   }, 4000);
+}
+
+// Load and display statistics on the admin dashboard
+async function loadStats() {
+  try {
+    const res = await fetch('api.php?action=stats');
+    const data = await res.json();
+    if (data.success && data.stats) {
+      document.getElementById('statTotalBooks').textContent = data.stats.totalBooks;
+      document.getElementById('statTotalStock').textContent = data.stats.totalStock;
+      document.getElementById('statTotalOrders').textContent = data.stats.totalOrders;
+      document.getElementById('statTotalRevenue').textContent = '$' + Number(data.stats.totalRevenue).toFixed(2);
+    }
+  } catch (e) {
+    console.error('Error loading stats', e);
+  }
 }
