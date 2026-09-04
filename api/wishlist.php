@@ -59,3 +59,30 @@ if (!$userId) {
     }
     sendJsonResponse(['success' => false, 'message' => 'Please log in to manage your wishlist.'], 401);
 }
+
+if ($action === 'get') {
+    $stmt = $pdo->prepare("
+        SELECT b.bookid, b.title, b.ISBN, b.price, b.stockQuantity, b.coverImageUrl,
+               GROUP_CONCAT(DISTINCT a.name SEPARATOR ', ') as authors
+        FROM Wishlist w
+        JOIN Book b ON w.bookid = b.bookid
+        LEFT JOIN Book_Author ba ON b.bookid = ba.bookid
+        LEFT JOIN Author a ON ba.authorid = a.authorid
+        WHERE w.userid = ?
+        GROUP BY b.bookid
+        ORDER BY b.title ASC
+    ");
+    $stmt->execute([$userId]);
+    $rows = $stmt->fetchAll();
+
+    foreach ($rows as &$r) {
+        $r['price'] = (float)$r['price'];
+        $r['stockQuantity'] = (int)$r['stockQuantity'];
+    }
+
+    sendJsonResponse([
+        'success' => true,
+        'items'   => $rows,
+        'count'   => count($rows)
+    ]);
+}
