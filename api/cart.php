@@ -91,3 +91,66 @@ if ($action === 'hydrate' || (!$userId && $action === 'get' && !empty($input['it
         'count'    => $totalCount
     ]);
 }
+
+if (!$userId) {
+    if ($action === 'get') {
+        sendJsonResponse([
+            'success'  => true,
+            'items'    => [],
+            'subTotal' => 0.00,
+            'count'    => 0,
+            'isGuest'  => true
+        ]);
+    }
+    sendJsonResponse(['success' => false, 'message' => 'Please log in to manage your database cart.'], 401);
+}
+
+$cartId = getUserCartId($pdo, (int)$userId);
+
+if ($action === 'get') {
+    $stmt = $pdo->prepare("
+        SELECT ci.bookid, ci.quantity, b.title, b.ISBN, b.price, b.stockQuantity, b.coverImageUrl,
+               GROUP_CONCAT(DISTINCT a.name SEPARATOR ', ') as authors
+        FROM Cart_Item ci
+        JOIN Book b ON ci.bookid = b.bookid
+        LEFT JOIN Book_Author ba ON b.bookid = ba.bookid
+        LEFT JOIN Author a ON ba.authorid = a.authorid
+        WHERE ci.cartid = ?
+        GROUP BY ci.bookid, ci.quantity, b.title, b.ISBN, b.price, b.stockQuantity, b.coverImageUrl
+    ");
+    $stmt->execute([$cartId]);
+    $rows = $stmt->fetchAll();
+
+    $cartItems = [];
+    $subTotal = 0.00;
+    $totalCount = 0;
+
+    foreach ($rows as $row) {
+        $bid = (int)$row['bookid'];
+        $qty = (int)$row['quantity'];
+        $price = (float)$row['price'];
+        $itemTotal = round($price * $qty, 2);
+        $subTotal += $itemTotal;
+        $totalCount += $qty;
+
+        $cartItems[] = [
+            'bookid'        => $bid,
+            'title'         => $row['title'],
+            'ISBN'          => $row['ISBN'],
+            'price'         => $price,
+            'stockQuantity' => (int)$row['stockQuantity'],
+            'coverImageUrl' => $row['coverImageUrl'],
+            'authors'       => $row['authors'],
+            'quantity'      => $qty,
+            'itemTotal'     => $itemTotal
+        ];
+    }
+
+    sendJsonResponse([
+        'success'  => true,
+        'items'    => $cartItems,
+        'subTotal' => round($subTotal, 2),
+        'count'    => $totalCount,
+        'cartId'   => $cartId
+    ]);
+}
