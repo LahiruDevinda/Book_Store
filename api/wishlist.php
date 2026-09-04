@@ -52,3 +52,10 @@ if ($action === 'hydrate' || (!$userId && $action === 'get' && !empty($input['it
         'count'   => count($rows)
     ]);
 }
+
+if (!$userId) {
+    if ($action === 'get') {
+        sendJsonResponse(['success' => true, 'items' => [], 'count' => 0, 'isGuest' => true]);
+    }
+    sendJsonResponse(['success' => false, 'message' => 'Please log in to manage your wishlist.'], 401);
+}
