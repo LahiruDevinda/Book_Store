@@ -499,3 +499,38 @@ async function toggleWishlist(bookId) {
     }
 }
 
+async function refreshWishlist() {
+    if (state.user) {
+        try {
+            const res = await fetch('api/wishlist.php?action=get');
+            const data = await res.json();
+            if (data.success) {
+                state.activeWishlist = data.items || [];
+                renderWishlistUI(data.count || 0);
+            }
+        } catch (e) {
+            console.error('Error fetching auth wishlist', e);
+        }
+    } else {
+        loadLocalGuestData();
+        if (state.guestWishlist.length === 0) {
+            state.activeWishlist = [];
+            renderWishlistUI(0);
+            return;
+        }
+        try {
+            const res = await fetch('api/wishlist.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hydrate', items: state.guestWishlist })
+            });
+            const data = await res.json();
+            if (data.success) {
+                state.activeWishlist = data.items || [];
+                renderWishlistUI(data.count || 0);
+            }
+        } catch (e) {
+            console.error('Error hydrating guest wishlist', e);
+        }
+    }
+}
