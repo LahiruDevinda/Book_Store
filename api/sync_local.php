@@ -95,5 +95,9 @@ try {
     ]);
 
 } catch (Exception $e) {
-
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log("Sync error: " . $e->getMessage());
+    sendJsonResponse(['success' => false, 'message' => 'Sync failed: ' . $e->getMessage()], 500);
 }
