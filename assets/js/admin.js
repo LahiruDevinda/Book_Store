@@ -258,3 +258,14 @@ function renderModalAuthors() {
         </label>
     `).join('');
 }
+
+function renderModalGenres() {
+    const container = document.getElementById('bookModalGenres');
+    if (!container) return;
+    container.innerHTML = cachedGenres.map(g => `
+        <label class="checkbox-pill">
+            <input type="checkbox" name="genreIds[]" value="${g.genreid}">
+            <span>${escapeHtml(g.genreName)}</span>
+        </label>
+    `).join('');
+}
