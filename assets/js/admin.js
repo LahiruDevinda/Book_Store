@@ -41,3 +41,16 @@ function setupTabs() {
     });
   });
 }
+
+
+// Display an alert message in the admin dashboard
+function showAdminAlert(msg, type = 'success') {
+  const alert = document.getElementById('adminAlert');
+  if (!alert) return;
+  alert.textContent = msg;
+  alert.className = `alert-box alert-${type}`;
+  alert.classList.remove('hidden');
+  setTimeout(() => {
+    alert.classList.add('hidden');
+  }, 4000);
+}
