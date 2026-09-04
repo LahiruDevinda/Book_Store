@@ -6,6 +6,14 @@ define('DB_NAME', getenv('DB_NAME') ?: 'bookstore_db');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'HBdeLA@2004');
 
+/**
+ * Returns a configured PDO instance or throws a PDOException.
+ * Supports auto-fallback between user password and empty password for XAMPP / MySQL80.
+ * 
+ * @param bool $selectDb Whether to include the dbname in DSN (false for setup scripts)
+ * @return PDO
+ */
+
 function getDBConnection(bool $selectDb = true): PDO {
     static $pdoInstance = null;
 
