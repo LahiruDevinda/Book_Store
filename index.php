@@ -38,4 +38,25 @@ startSecureSession();
                     </div>
                 </div>
 
-                
+                    <!-- Right Actions -->
+                <div class="header-actions">
+                    <!-- Wishlist Trigger -->
+                    <button class="action-icon-btn" id="wishlistTrigger" title="View Wishlist">
+                        <span>🤍</span>
+                        <span class="action-badge" id="wishlistBadge" style="display:none;">0</span>
+                    </button>
+
+                    <!-- Cart Trigger -->
+                    <button class="action-icon-btn" id="cartTrigger" title="View Cart">
+                        <span>🛍️</span>
+                        <span class="action-badge" id="cartBadge" style="display:none;">0</span>
+                        <span class="cart-total-badge" id="cartTotalBadge"></span>
+                    </button>
+
+                    <!-- User Profile / Auth Area -->
+                    <div id="authActionArea">
+                        <button class="btn btn-secondary btn-sm" id="openAuthModalBtn">Sign In</button>
+                    </div>
+                </div>
+            </div>
+        </header>
