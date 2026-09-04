@@ -33,3 +33,14 @@ foreach ($tables as $t) {
     }
 }
 assertCondition($allTablesPresent, "All 15 schema tables present in database");
+
+function checkCompositePk(PDO $pdo, string $table, array $expectedCols): bool {
+    $stmt = $pdo->query("SHOW KEYS FROM $table WHERE Key_name = 'PRIMARY'");
+    $cols = $stmt->fetchAll(PDO::FETCH_COLUMN, 4);
+    return count($cols) === count($expectedCols) && empty(array_diff($expectedCols, $cols));
+}
+
+assertCondition(checkCompositePk($pdo, 'Book_Author', ['bookid', 'authorid']), "Book_Author composite PK (bookid, authorid)");
+assertCondition(checkCompositePk($pdo, 'Wishlist', ['userid', 'bookid']), "Wishlist composite PK (userid, bookid)");
+assertCondition(checkCompositePk($pdo, 'Cart_Item', ['cartid', 'bookid']), "Cart_Item composite PK (cartid, bookid)");
+assertCondition(checkCompositePk($pdo, 'Order_Item', ['orderid', 'bookid']), "Order_Item composite PK (orderid, bookid)");
