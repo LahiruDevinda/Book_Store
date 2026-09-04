@@ -58,7 +58,11 @@ $adminUser = $_SESSION['user'];
 
 <body class="admin-body">
   <!-- Admin navigation -->
-  <header class="admin-header"></header>
+  <header class="admin-header">
+    <div class="header-inner container">
+      
+    </div>
+  </header>
 
   <!-- Admin Main Content -->
   <main class="container admin-container"></main>
