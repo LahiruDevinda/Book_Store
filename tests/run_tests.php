@@ -61,3 +61,12 @@ assertCondition($admin && password_verify('Admin@1234', $admin['password']), "Ad
 assertCondition($admin && (bool)$admin['isAdmin'], "Admin isAdmin flag is TRUE");
 
 echo "\n--- Group 3: LocalStorage Synchronization (The Merge) ---\n";
+
+$testUserEmail = 'merge_test_' . time() . '@test.com';
+$hash = password_hash('Pass@123', PASSWORD_BCRYPT);
+$pdo->prepare("INSERT INTO Users (firstName, lastName, email, password, isAdmin) VALUES ('Merge', 'Test', ?, ?, 0)")
+    ->execute([$testUserEmail, $hash]);
+$testUserId = (int)$pdo->lastInsertId();
+$pdo->prepare("INSERT INTO Cart (userid) VALUES (?)")->execute([$testUserId]);
+$testCartId = (int)$pdo->lastInsertId();
+
