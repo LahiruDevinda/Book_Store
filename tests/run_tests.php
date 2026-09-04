@@ -136,3 +136,16 @@ foreach ($orderItems as $it) {
 $pdo->prepare("UPDATE PromoCode SET isValid = 0 WHERE promoCodeld = ?")->execute([$testPromoId]);
 $pdo->prepare("DELETE FROM Cart_Item WHERE cartid = ?")->execute([$testCartId]);
 $pdo->commit();
+
+$savedOrder = $pdo->query("SELECT * FROM Orders WHERE orderid = $orderId")->fetch();
+assertCondition(abs((float)$savedOrder['subTotal'] - (float)$finalTotal) < 0.01, "Order recorded with calculated discounted subtotal (\$$finalTotal)");
+
+$savedItems = $pdo->query("SELECT * FROM Order_Item WHERE orderid = $orderId")->fetchAll();
+assertCondition(count($savedItems) === 2, "Order_Item recorded 2 locked line items");
+assertCondition((float)$savedItems[0]['unitPrice'] === $firstBookPrice, "Order_Item unitPrice locked in exactly at purchase time (\$$firstBookPrice)");
+
+$promoState = $pdo->query("SELECT isValid FROM PromoCode WHERE promoCodeld = $testPromoId")->fetchColumn();
+assertCondition((int)$promoState === 0, "Promo code invalidated (isValid = FALSE)");
+
+$remainingCart = $pdo->query("SELECT COUNT(*) FROM Cart_Item WHERE cartid = $testCartId")->fetchColumn();
+assertCondition((int)$remainingCart === 0, "User's Cart_Item cleared after order placement");
