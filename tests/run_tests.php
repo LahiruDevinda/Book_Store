@@ -86,3 +86,9 @@ $wishCount = (int)$pdo->query("SELECT COUNT(*) FROM Wishlist WHERE userid = $tes
 
 assertCondition($cartCount === 2, "Cart_Item populated with merged items");
 assertCondition($wishCount === 1, "Wishlist populated with merged item");
+
+$stmtSyncCart->execute([$testCartId, $bid1, 2]);
+$stmtSyncWish->execute([$testUserId, $bid1]);
+$cartCountAfter = (int)$pdo->query("SELECT COUNT(*) FROM Cart_Item WHERE cartid = $testCartId")->fetchColumn();
+assertCondition($cartCountAfter === 2, "INSERT IGNORE safely handled duplicate merge without error or duplicates");
+
