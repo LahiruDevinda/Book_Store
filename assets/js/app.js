@@ -573,3 +573,27 @@ function renderWishlistUI(count) {
     `).join('');
 }
 
+async function moveToCart(bookId) {
+    await addToCart(bookId);
+    await toggleWishlist(bookId);
+}
+
+// ======================== GUEST CHECKOUT INTERCEPTION ========================
+function handleProceedToCheckout() {
+    if (!state.user) {
+        // Intercept Guest: close drawer and open auth modal with message
+        closeDrawers();
+        state.isCheckingOut = true;
+        openAuthModal('login', 'Please sign in or create an account to complete your checkout.');
+        return;
+    }
+
+    if (state.activeCart.length === 0) {
+        showToast('Your cart is empty.', 'error');
+        return;
+    }
+
+    closeDrawers();
+    openCheckoutModal();
+}
+
