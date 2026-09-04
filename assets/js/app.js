@@ -719,3 +719,177 @@ async function applyPromoCode() {
         showToast('Error validating promo code.', 'error');
     }
 }
+
+// Execute Place Order
+async function placeOrder() {
+    const btn = document.getElementById('placeOrderBtn');
+    if (btn) btn.disabled = true;
+
+    let payload = {
+        action: 'place_order',
+        promoCode: state.appliedPromo ? state.appliedPromo.code : '',
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD'
+    };
+
+    if (state.selectedAddressId) {
+        payload.addressid = state.selectedAddressId;
+    } else {
+        const no = document.getElementById('addrNo')?.value.trim();
+        const street = document.getElementById('addrStreet')?.value.trim();
+        const zipCode = document.getElementById('addrZip')?.value.trim();
+
+        if (!no || !street || !zipCode) {
+            showToast('Please provide your delivery address.', 'error');
+            if (btn) btn.disabled = false;
+            return;
+        }
+        payload.newAddress = { no, street, zipCode };
+    }
+
+    try {
+        const res = await fetch('api/checkout.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            // Order Placed successfully
+            showOrderSuccessReceipt(data);
+            await refreshCart();
+            await loadBooks(); // Stock updated
+        } else {
+            showToast(data.message || 'Checkout failed.', 'error');
+            if (btn) btn.disabled = false;
+        }
+    } catch (e) {
+        showToast('An error occurred during checkout.', 'error');
+        if (btn) btn.disabled = false;
+    }
+}
+
+function showOrderSuccessReceipt(orderData) {
+    const modalBody = document.getElementById('checkoutModalBody');
+    if (!modalBody) return;
+
+    modalBody.innerHTML = `
+        <div style="text-align:center; padding:20px 0;">
+            <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+            <h2 style="font-size:22px; font-weight:700; margin-bottom:6px;">Thank You for Your Order!</h2>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">
+                Your order <strong>#${orderData.orderId}</strong> has been successfully placed.
+            </p>
+            <div style="background:var(--bg-canvas); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; text-align:left; margin-bottom:20px;">
+                <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Order Summary</div>
+                ${(orderData.items || []).map(it => `
+                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                        <span>${escapeHtml(it.title)} &times; ${it.quantity} <span style="color:var(--text-muted); font-size:11px;">(locked @ $${Number(it.unitPrice).toFixed(2)})</span></span>
+                        <strong>$${Number(it.itemTotal).toFixed(2)}</strong>
+                    </div>
+                `).join('')}
+                <div style="height:1px; background:var(--border-color); margin:10px 0;"></div>
+                <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:700;">
+                    <span>Total Paid (${orderData.paymentMethod}):</span>
+                    <span>$${Number(orderData.finalTotal).toFixed(2)}</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="closeCheckoutModal()">Continue Browsing</button>
+        </div>
+    `;
+}
+
+function closeCheckoutModal() {
+    const modal = document.getElementById('checkoutModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        window.location.reload();
+    }
+}
+
+// ======================== BOOK DETAILS & REVIEWS ========================
+async function openBookDetailsModal(bookId) {
+    const modal = document.getElementById('bookDetailsModal');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    const container = document.getElementById('bookDetailsContent');
+    container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">Loading book details...</div>';
+
+    try {
+        const res = await fetch(`api/books.php?action=detail&id=${bookId}`);
+        const data = await res.json();
+        if (data.success && data.book) {
+            const b = data.book;
+            const isOutOfStock = b.stockQuantity <= 0;
+            const isWishlisted = isBookInWishlist(b.bookid);
+
+            container.innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:24px; margin-bottom:24px;">
+                    <div>
+                        <img src="${b.coverImageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80'}" alt="${escapeHtml(b.title)}" style="width:100%; border-radius:var(--radius-md); box-shadow:var(--shadow-md); object-fit:cover; aspect-ratio:3/4;">
+                    </div>
+                    <div>
+                        <div style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">${escapeHtml(b.genres || 'Literature')}</div>
+                        <h2 style="font-size:20px; font-weight:700; margin-bottom:8px;">${escapeHtml(b.title)}</h2>
+                        <div style="font-size:14px; color:var(--text-muted); margin-bottom:12px;">By <strong>${escapeHtml(b.authors || 'Unknown')}</strong></div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">ISBN: <strong>${escapeHtml(b.ISBN)}</strong></div>
+                        <div style="font-size:24px; font-weight:700; color:var(--text-main); margin-bottom:16px;">$${Number(b.price).toFixed(2)}</div>
+                        <div style="margin-bottom:20px;">
+                            ${isOutOfStock ? `<span class="badge badge-warning">Currently Out of Stock</span>` : `<span class="badge badge-success">${b.stockQuantity} in stock</span>`}
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-primary" ${isOutOfStock ? 'disabled' : ''} onclick="addToCart(${b.bookid})">Add to Cart</button>
+                            <button class="btn btn-secondary" onclick="toggleWishlist(${b.bookid})">${isWishlisted ? '❤️ In Wishlist' : '🤍 Wishlist'}</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div style="border-top:1px solid var(--border-color); padding-top:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 style="font-size:16px; font-weight:700;">Customer Reviews (${b.reviews.length})</h3>
+                        <div style="font-size:14px;">Rating: <strong style="color:var(--star);">★ ${b.avgRating > 0 ? b.avgRating : 'New'}</strong> / 5</div>
+                    </div>
+
+                    ${state.user ? `
+                        <form id="submitReviewForm" style="background:var(--bg-canvas); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; margin-bottom:20px;" onsubmit="handleReviewSubmit(event, ${b.bookid})">
+                            <div style="font-weight:600; font-size:13px; margin-bottom:8px;">Write a Review</div>
+                            <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+                                <label style="font-size:12px; font-weight:600;">Rating:</label>
+                                <select id="reviewRatingSelect" class="form-control" style="width:auto; padding:4px 8px;" required>
+                                    <option value="5">★★★★★ (5 Stars)</option>
+                                    <option value="4">★★★★☆ (4 Stars)</option>
+                                    <option value="3">★★★☆☆ (3 Stars)</option>
+                                    <option value="2">★★☆☆☆ (2 Stars)</option>
+                                    <option value="1">★☆☆☆☆ (1 Star)</option>
+                                </select>
+                            </div>
+                            <textarea id="reviewTextarea" class="form-control" placeholder="Share your honest thoughts about this book..." required style="margin-bottom:10px;"></textarea>
+                            <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
+                        </form>
+                    ` : `
+                        <div style="padding:12px; background:var(--bg-canvas); border-radius:var(--radius-sm); font-size:13px; color:var(--text-muted); margin-bottom:16px;">
+                            Please <button onclick="openAuthModal('login')" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer; text-decoration:underline;">sign in</button> to share your review.
+                        </div>
+                    `}
+
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        ${b.reviews.length === 0 ? `<div style="font-size:13px; color:var(--text-muted);">No reviews submitted yet. Be the first to review!</div>` : ''}
+                        ${b.reviews.map(r => `
+                            <div style="border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                    <strong style="font-size:13px;">${escapeHtml(r.firstName + ' ' + r.lastName)}</strong>
+                                    <span style="color:var(--star); font-size:12px;">${'★'.repeat(r.rate)}${'☆'.repeat(5 - r.rate)}</span>
+                                </div>
+                                <p style="font-size:13px; color:var(--text-muted); line-height:1.4;">${escapeHtml(r.description)}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    } catch (e) {
+        container.innerHTML = '<div style="color:var(--danger); text-align:center; padding:20px;">Failed to load details.</div>';
+    }
+}
