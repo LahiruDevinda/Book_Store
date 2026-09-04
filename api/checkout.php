@@ -124,6 +124,20 @@ if ($action === 'place_order') {
             sendJsonResponse(['success' => false, 'message' => 'Your cart is empty.'], 400);
         }
 
+        $subTotal = 0.00;
+        foreach ($items as $item) {
+            $qty = (int)$item['quantity'];
+            $stock = (int)$item['stockQuantity'];
+            if ($stock < $qty) {
+                $pdo->rollBack();
+                sendJsonResponse([
+                    'success' => false,
+                    'message' => "Insufficient stock for '{$item['title']}'."
+                ], 400);
+            }
+            $subTotal += ((float)$item['price'] * $qty);
+        }
+    
 
     } catch (Exception $e) {}
 }    
