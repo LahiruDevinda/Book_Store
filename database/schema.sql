@@ -103,3 +103,11 @@ CREATE TABLE IF NOT EXISTS Book_Genre (
     FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE,
     FOREIGN KEY (genreid) REFERENCES Genre(genreid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Wishlist (
+    userid INT,
+    bookid INT,
+    PRIMARY KEY (userid, bookid),
+    FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE,
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
