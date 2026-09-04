@@ -247,3 +247,14 @@ function renderGenresList() {
         <span class="genre-tag">${escapeHtml(g.genreName)}</span>
     `).join('');
 }
+
+function renderModalAuthors() {
+    const container = document.getElementById('bookModalAuthors');
+    if (!container) return;
+    container.innerHTML = cachedAuthors.map(a => `
+        <label class="checkbox-pill">
+            <input type="checkbox" name="authorIds[]" value="${a.authorid}">
+            <span>${escapeHtml(a.name)}</span>
+        </label>
+    `).join('');
+}
