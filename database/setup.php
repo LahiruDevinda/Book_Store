@@ -104,3 +104,67 @@ try {
             'authors' => ['Robert C. Martin'],
             'genres' => ['Software Engineering']
         ],
+        [
+            'title' => 'Clean Architecture: A Craftsman\'s Guide to Software Structure',
+            'ISBN' => '978-0134494166',
+            'price' => 38.50,
+            'stock' => 10,
+            'cover' => 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['Robert C. Martin'],
+            'genres' => ['Software Engineering']
+        ],
+        [
+            'title' => 'Refactoring: Improving the Design of Existing Code',
+            'ISBN' => '978-0134757599',
+            'price' => 49.99,
+            'stock' => 8,
+            'cover' => 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['Martin Fowler'],
+            'genres' => ['Software Engineering']
+        ],
+        [
+            'title' => '1984',
+            'ISBN' => '978-0451524935',
+            'price' => 14.95,
+            'stock' => 25,
+            'cover' => 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['George Orwell'],
+            'genres' => ['Classic Literature', 'Dystopian']
+        ],
+        [
+            'title' => 'Animal Farm',
+            'ISBN' => '978-0451526342',
+            'price' => 11.50,
+            'stock' => 30,
+            'cover' => 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['George Orwell'],
+            'genres' => ['Classic Literature', 'Dystopian']
+        ],
+        [
+            'title' => 'Dune',
+            'ISBN' => '978-0441172719',
+            'price' => 18.99,
+            'stock' => 18,
+            'cover' => 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['Frank Herbert'],
+            'genres' => ['Science Fiction']
+        ],
+        [
+            'title' => 'The Great Gatsby',
+            'ISBN' => '978-0743273565',
+            'price' => 15.20,
+            'stock' => 12,
+            'cover' => 'https://images.unsplash.com/photo-1495640388908-05fa85288e61?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['F. Scott Fitzgerald'],
+            'genres' => ['Classic Literature']
+        ],
+        [
+            'title' => 'Sapiens: A Brief History of Humankind',
+            'ISBN' => '978-0062316097',
+            'price' => 24.00,
+            'stock' => 14,
+            'cover' => 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['Yuval Noah Harari'],
+            'genres' => ['History', 'Philosophy']
+        ]
+    ];
