@@ -124,3 +124,16 @@ startSecureSession();
                 </div>
             </div>
         </div>
+
+            <!-- ======================== WISHLIST DRAWER ======================== -->
+        <div class="drawer-overlay" id="wishlistDrawerOverlay">
+            <div class="drawer">
+                <div class="drawer-header">
+                    <div class="drawer-title">Your Wishlist</div>
+                    <button class="drawer-close-btn">&times;</button>
+                </div>
+                <div class="drawer-content" id="wishlistDrawerItems">
+                    <!-- Wishlist items injected via JS -->
+                </div>
+            </div>
+        </div>
