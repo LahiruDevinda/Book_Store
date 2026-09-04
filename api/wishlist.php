@@ -86,3 +86,34 @@ if ($action === 'get') {
         'count'   => count($rows)
     ]);
 }
+if ($action === 'toggle') {
+    $bookId = (int)($input['bookid'] ?? 0);
+    if ($bookId <= 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Invalid book ID.'], 400);
+    }
+
+    $chk = $pdo->prepare("SELECT bookid FROM Wishlist WHERE userid = ? AND bookid = ?");
+    $chk->execute([$userId, $bookId]);
+    $exists = $chk->fetch();
+
+    if ($exists) {
+        $pdo->prepare("DELETE FROM Wishlist WHERE userid = ? AND bookid = ?")->execute([$userId, $bookId]);
+        $inWishlist = false;
+        $msg = 'Removed from wishlist.';
+    } else {
+        $pdo->prepare("INSERT IGNORE INTO Wishlist (userid, bookid) VALUES (?, ?)")->execute([$userId, $bookId]);
+        $inWishlist = true;
+        $msg = 'Added to wishlist!';
+    }
+
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM Wishlist WHERE userid = ?");
+    $countStmt->execute([$userId]);
+    $count = (int)$countStmt->fetchColumn();
+
+    sendJsonResponse([
+        'success'    => true,
+        'inWishlist' => $inWishlist,
+        'count'      => $count,
+        'message'    => $msg
+    ]);
+}
