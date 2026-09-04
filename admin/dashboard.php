@@ -36,3 +36,15 @@ if (!isset($_SESSION['user']['userid']) || empty($_SESSION['user']['isAdmin'])) 
 // If the user is an admin, retrieve their information
 $adminUser = $_SESSION['user'];
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Center - BookStore</title>
+</head>
+<body>
+  
+</body>
+</html>
