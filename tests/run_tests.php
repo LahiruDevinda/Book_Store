@@ -149,3 +149,9 @@ assertCondition((int)$promoState === 0, "Promo code invalidated (isValid = FALSE
 
 $remainingCart = $pdo->query("SELECT COUNT(*) FROM Cart_Item WHERE cartid = $testCartId")->fetchColumn();
 assertCondition((int)$remainingCart === 0, "User's Cart_Item cleared after order placement");
+
+echo "\n--- Group 5: Social & Reviews ---\n";
+$stmtReview = $pdo->prepare("INSERT INTO Review (userid, bookid, rate, review) VALUES (?, ?, 5, 'Exceptional book, pristine quality!')");
+$stmtReview->execute([$testUserId, $bid1]);
+$reviewId = (int)$pdo->lastInsertId();
+assertCondition($reviewId > 0, "Review successfully created with 5-star rating");
