@@ -1113,3 +1113,71 @@ function setupEventListeners() {
     const registerForm = document.getElementById('registerForm');
     if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
     if (registerForm) registerForm.addEventListener('submit', handleRegisterSubmit);
+
+     // Modal close triggers
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+        });
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.add('hidden');
+            }
+        });
+    });
+
+    // Checkout Modal buttons
+    const applyPromoBtn = document.getElementById('applyPromoBtn');
+    if (applyPromoBtn) applyPromoBtn.addEventListener('click', applyPromoCode);
+
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    if (placeOrderBtn) placeOrderBtn.addEventListener('click', placeOrder);
+
+    // Mobile bottom nav buttons
+    const mobSearchBtn = document.getElementById('mobSearchBtn');
+    if (mobSearchBtn) {
+        mobSearchBtn.addEventListener('click', () => {
+            const wrapper = document.querySelector('.search-wrapper');
+            if (wrapper) {
+                wrapper.style.display = wrapper.style.display === 'block' ? 'none' : 'block';
+                if (wrapper.style.display === 'block') {
+                    searchInput?.focus();
+                }
+            }
+        });
+    }
+}
+
+function closeDrawers() {
+    document.querySelectorAll('.drawer-overlay').forEach(d => d.classList.remove('open'));
+}
+
+// Toast Notifications
+function showToast(message, type = 'normal') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3200);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
