@@ -241,7 +241,54 @@ $adminUser = $_SESSION['user'];
   </main>
 
   <!-- Add New Book -->
-  <div id="addBookModal" class="modal-overlay hidden"></div>
+  <div id="addBookModal" class="modal-overlay hidden">
+    <div class="modal-dialog" style="max-width:560px;">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Book</h3>
+        <button class="modal-close" id="closeAddBookModal">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="addBookForm" class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Book Title *</label>
+          <input type="text" name="title" class="form-control" required placeholder="e.g. Design Patterns">
+        </div>
+        <div class="form-group-row">
+          <div class="form-group">
+            <label class="form-label">ISBN *</label>
+            <input type="text" name="ISBN" class="form-control" required placeholder="e.g. 978-0201633610">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price ($) *</label>
+            <input type="number" step="0.01" min="0.01" name="price" class="form-control" required placeholder="49.99">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock Quantity *</label>
+            <input type="number" min="0" name="stockQuantity" class="form-control" required placeholder="10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cover Image URL</label>
+          <input type="url" name="coverImageUrl" class="form-control" placeholder="https://images.unsplash.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Authors (Select all that apply)</label>
+          <div id="bookModalAuthors" class="checkbox-select-box"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Genres (Select all that apply)</label>
+          <div id="bookModalGenres" class="checkbox-select-box"></div>
+        </div>
+        <div class="modal-footer" style="padding:0; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" id="cancelAddBookBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Edit Book Modal -->
   <div id="editBookModal" class="modal-overlay hidden"></div>
