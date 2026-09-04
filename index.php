@@ -71,3 +71,12 @@ startSecureSession();
                 </p>
             </div>
         </section>
+
+            <!-- ======================== GENRE FILTER TRACK ======================== -->
+        <nav class="genre-filter-nav">
+            <div class="container">
+                <div class="genre-filter-track" id="genreFilterTrack">
+                    <button class="genre-pill active" data-id="0">All Books</button>
+                </div>
+            </div>
+        </nav>
