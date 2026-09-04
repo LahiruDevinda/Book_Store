@@ -1031,3 +1031,85 @@ async function handleRegisterSubmit(e) {
         showToast('Registration request error.', 'error');
     }
 }
+
+// ======================== DRAWERS & UTILITIES ========================
+function setupEventListeners() {
+    // Search with debounce
+    const searchInput = document.getElementById('siteSearchInput');
+    const searchClear = document.getElementById('searchClearBtn');
+    let debounceTimer = null;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            if (searchClear) {
+                searchClear.style.display = searchInput.value ? 'block' : 'none';
+            }
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                state.searchQuery = searchInput.value;
+                loadBooks();
+            }, 300);
+        });
+    }
+
+    if (searchClear) {
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClear.style.display = 'none';
+            state.searchQuery = '';
+            loadBooks();
+        });
+    }
+
+    // Sort select
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            state.currentSort = sortSelect.value;
+            loadBooks();
+        });
+    }
+
+    // Drawer triggers
+    const cartTrigger = document.getElementById('cartTrigger');
+    const wishlistTrigger = document.getElementById('wishlistTrigger');
+    const cartDrawerOverlay = document.getElementById('cartDrawerOverlay');
+    const wishlistDrawerOverlay = document.getElementById('wishlistDrawerOverlay');
+
+    if (cartTrigger) {
+        cartTrigger.addEventListener('click', () => {
+            cartDrawerOverlay.classList.add('open');
+        });
+    }
+    if (wishlistTrigger) {
+        wishlistTrigger.addEventListener('click', () => {
+            wishlistDrawerOverlay.classList.add('open');
+        });
+    }
+
+    document.querySelectorAll('.drawer-close-btn').forEach(btn => {
+        btn.addEventListener('click', closeDrawers);
+    });
+
+    document.querySelectorAll('.drawer-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeDrawers();
+        });
+    });
+
+    // Proceed to checkout button in cart drawer
+    const checkoutBtn = document.getElementById('proceedToCheckoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', handleProceedToCheckout);
+    }
+
+    // Auth Modal tab switching & submissions
+    const loginTabBtn = document.getElementById('loginTabBtn');
+    const registerTabBtn = document.getElementById('registerTabBtn');
+    if (loginTabBtn) loginTabBtn.addEventListener('click', () => switchAuthTab('login'));
+    if (registerTabBtn) registerTabBtn.addEventListener('click', () => switchAuthTab('register'));
+
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
+    if (registerForm) registerForm.addEventListener('submit', handleRegisterSubmit);
