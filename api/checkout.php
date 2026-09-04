@@ -99,6 +99,31 @@ if ($action === 'place_order') {
             }
         }
 
-        
+        $stmtCart = $pdo->prepare("SELECT cartid FROM Cart WHERE userid = ? LIMIT 1");
+        $stmtCart->execute([$userId]);
+        $cart = $stmtCart->fetch();
+
+        if (!$cart) {
+            $pdo->rollBack();
+            sendJsonResponse(['success' => false, 'message' => 'Cart not found.'], 400);
+        }
+        $cartId = (int)$cart['cartid'];
+
+        $stmtItems = $pdo->prepare("
+            SELECT ci.bookid, ci.quantity, b.title, b.price, b.stockQuantity
+            FROM Cart_Item ci
+            JOIN Book b ON ci.bookid = b.bookid
+            WHERE ci.cartid = ?
+            FOR UPDATE
+        ");
+        $stmtItems->execute([$cartId]);
+        $items = $stmtItems->fetchAll();
+
+        if (empty($items)) {
+            $pdo->rollBack();
+            sendJsonResponse(['success' => false, 'message' => 'Your cart is empty.'], 400);
+        }
+
+
     } catch (Exception $e) {}
 }    
