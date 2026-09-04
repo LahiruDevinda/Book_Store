@@ -98,14 +98,32 @@ $adminUser = $_SESSION['user'];
 
     <!-- ==================== OVERVIEW TAB ==================== -->
     <section id="tab-overview" class="admin-panel active">
+      <!-- Panel Header -->
       <div class="panel-header">
         <div>
           <h1 class="panel-title">System Overview</h1>
           <p class="panel-subtitle">Real-time summary of catalog inventory and customer orders.</p>
         </div>
       </div>
-
-      <div class="stats-grid"></div>
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Books</div>
+          <div class="stat-value" id="statTotalBooks">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Units in Stock</div>
+          <div class="stat-value" id="statTotalStock">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Orders Completed</div>
+          <div class="stat-value" id="statTotalOrders">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Sales Volume</div>
+          <div class="stat-value" id="statTotalRevenue">$0.00</div>
+        </div>
+      </div>
     </section>
 
     <!-- ==================== INVENTORY TAB ==================== -->
