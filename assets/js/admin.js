@@ -25,3 +25,19 @@ function initAdmin() {
   }
 }
 
+// Setup tab navigation for the admin dashboard
+function setupTabs() {
+  const tabs = document.querySelectorAll('.admin-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      const target = document.getElementById('tab-' + tab.dataset.tab);
+      if (target) {
+        target.classList.add('active');
+      }
+    });
+  });
+}
