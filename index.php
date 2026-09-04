@@ -104,3 +104,23 @@ startSecureSession();
                 <!-- Books dynamically injected by assets/js/app.js -->
             </div>
         </main>
+
+            <!-- ======================== CART DRAWER ======================== -->
+        <div class="drawer-overlay" id="cartDrawerOverlay">
+            <div class="drawer">
+                <div class="drawer-header">
+                    <div class="drawer-title">Shopping Cart</div>
+                    <button class="drawer-close-btn">&times;</button>
+                </div>
+                <div class="drawer-content" id="cartDrawerItems">
+                    <!-- Cart items injected via JS -->
+                </div>
+                <div class="drawer-footer">
+                    <div class="drawer-subtotal">
+                        <span>Subtotal:</span>
+                        <span id="cartDrawerSubtotal">$0.00</span>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="proceedToCheckoutBtn">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
