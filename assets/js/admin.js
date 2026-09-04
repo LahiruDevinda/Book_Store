@@ -152,4 +152,50 @@ window.deleteBook = async function(bookId, title) {
     }
 };
 
+// Load and display customer orders in the admin dashboard
+async function loadOrders() {
+    const tbody = document.getElementById('ordersTableBody');
+    try {
+        const res = await fetch('api.php?action=get_orders');
+        const data = await res.json();
+        if (data.success && data.orders) {
+            if (data.orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">No customer orders yet.</td></tr>';
+                return;
+            }
 
+            tbody.innerHTML = data.orders.map(o => {
+                const itemsHtml = (o.items || []).map(it => `
+                    <div style="font-size:12px; margin-bottom:4px; line-height:1.4;">
+                        <strong>${escapeHtml(it.title || 'Book #' + it.bookid)}</strong> &times; ${it.quantity}
+                        <span style="color:var(--text-muted); font-size:11px;">(locked @ $${Number(it.unitPrice).toFixed(2)})</span>
+                    </div>
+                `).join('');
+
+                const addr = o.street ? `${escapeHtml(o.no)}, ${escapeHtml(o.street)} (${escapeHtml(o.zipCode)})` : 'Default Address';
+
+                return `
+                    <tr>
+                        <td style="font-weight:700;">#${o.orderid}</td>
+                        <td style="font-size:12px; color:var(--text-muted); white-space:nowrap;">${o.orderDate || 'Recent'}</td>
+                        <td>
+                            <div style="font-weight:600;">${escapeHtml(o.firstName + ' ' + o.lastName)}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">${escapeHtml(o.email)}</div>
+                        </td>
+                        <td style="font-size:12px; color:var(--text-muted); max-width:180px;">${addr}</td>
+                        <td>${itemsHtml}</td>
+                        <td style="font-weight:700; font-size:15px; color:var(--text-main);">$${Number(o.subTotal).toFixed(2)}</td>
+                        <td>
+                            <span class="badge badge-neutral">${o.paymentMethod || 'COD'}</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-success">${o.orderStatus}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Failed to load orders.</td></tr>';
+    }
+}
