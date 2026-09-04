@@ -70,3 +70,6 @@ $testUserId = (int)$pdo->lastInsertId();
 $pdo->prepare("INSERT INTO Cart (userid) VALUES (?)")->execute([$testUserId]);
 $testCartId = (int)$pdo->lastInsertId();
 
+$bookIds = $pdo->query("SELECT bookid FROM Book LIMIT 2")->fetchAll(PDO::FETCH_COLUMN);
+$bid1 = (int)$bookIds[0];
+$bid2 = (int)$bookIds[1];
