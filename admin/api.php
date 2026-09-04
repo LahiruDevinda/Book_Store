@@ -170,3 +170,17 @@ if ($action === 'get_authors') {
     $stmt = $pdo->query("SELECT authorid, name, biography FROM Author ORDER BY name ASC");
     sendJsonResponse(['success' => true, 'authors' => $stmt->fetchAll()]);
 }
+
+if ($action === 'add_author') {
+    $name = trim($input['name'] ?? '');
+    $bio = trim($input['biography'] ?? '');
+
+    if (empty($name)) {
+        sendJsonResponse(['success' => false, 'message' => 'Author name is required.'], 400);
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO Author (name, biography) VALUES (?, ?)");
+    $stmt->execute([$name, $bio]);
+
+    sendJsonResponse(['success' => true, 'message' => 'Author created!', 'authorid' => (int)$pdo->lastInsertId()]);
+}
