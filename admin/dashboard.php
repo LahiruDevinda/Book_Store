@@ -201,7 +201,43 @@ $adminUser = $_SESSION['user'];
     </section>
 
     <!-- ==================== AUTHORS & GENRES TAB ==================== -->
-    <section id="tab-taxonomies" class="admin-panel"></section>
+    <section id="tab-taxonomies" class="admin-panel">
+      <!-- Panel Header -->
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Taxonomies Management</h1>
+          <p class="panel-subtitle">Manage authors and literary genre classifications.</p>
+        </div>
+      </div>
+
+      <!-- Taxonomy Management -->
+      <div class="two-col-grid">
+        <!-- Authors Card -->
+        <div class="card p-4">
+          <h3>Authors</h3>
+          <form id="addAuthorForm">
+            <input type="text" id="newAuthorName" placeholder="Author Full Name" class="form-control" required>
+            <textarea id="newAuthorBio" placeholder="Short Biography" class="form-control" rows="2"></textarea>
+            <button type="submit" class="btn btn-primary btn-sm">+ Add Author</button>
+          </form>
+          <div id="authorsList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Genres Card -->
+        <div class="card p-4">
+          <h3">Genres</h3>
+          <form id="addGenreForm">
+            <input type="text" id="newGenreName" placeholder="New Genre Name" class="form-control" required>
+            <button type="submit" class="btn btn-primary btn-sm">+ Add Genre</button>
+          </form>
+          <div id="genresList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Add New Book -->
