@@ -93,3 +93,14 @@ try {
             $genreMap[$g] = $pdo->lastInsertId();
         }
     }  
+
+     $books = [
+        [
+            'title' => 'Clean Code: A Handbook of Agile Software Craftsmanship',
+            'ISBN' => '978-0132350884',
+            'price' => 42.99,
+            'stock' => 15,
+            'cover' => 'https://images.unsplash.com/photo-1532012164546-f432f2e3777f?w=600&auto=format&fit=crop&q=80',
+            'authors' => ['Robert C. Martin'],
+            'genres' => ['Software Engineering']
+        ],
