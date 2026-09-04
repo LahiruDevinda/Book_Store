@@ -202,3 +202,44 @@ if ($action === 'add_genre') {
 
     sendJsonResponse(['success' => true, 'message' => 'Genre saved!', 'genreid' => (int)$pdo->lastInsertId()]);
 }
+
+// ======================== AUDIT ORDERS WITH HISTORICAL UNIT PRICES ========================
+if ($action === 'get_orders') {
+    $stmt = $pdo->query("
+        SELECT o.orderid, o.userid, o.subTotal, o.orderStatus, o.date AS orderDate,
+               u.firstName, u.lastName, u.email,
+               ab.no, ab.street, ab.zipCode,
+               p.code AS promoCode,
+               pay.method AS paymentMethod
+        FROM Orders o
+        JOIN Users u ON o.userid = u.userid
+        LEFT JOIN AddressBook ab ON o.addressid = ab.addressid
+        LEFT JOIN PromoCode p ON o.promoCodeld = p.promoCodeld
+        LEFT JOIN Payment pay ON o.orderid = pay.orderid
+        ORDER BY o.orderid DESC
+    ");
+    $orders = $stmt->fetchAll();
+
+    foreach ($orders as &$ord) {
+        $ord['subTotal'] = (float)$ord['subTotal'];
+
+        // Fetch order items with locked unit prices
+        $stmtItems = $pdo->prepare("
+            SELECT oi.bookid, oi.unitPrice, oi.quantity, b.title
+            FROM Order_Item oi
+            LEFT JOIN Book b ON oi.bookid = b.bookid
+            WHERE oi.orderid = ?
+        ");
+        $stmtItems->execute([$ord['orderid']]);
+        $items = $stmtItems->fetchAll();
+
+        foreach ($items as &$it) {
+            $it['unitPrice'] = (float)$it['unitPrice'];
+            $it['quantity'] = (int)$it['quantity'];
+            $it['lineTotal'] = round($it['unitPrice'] * $it['quantity'], 2);
+        }
+        $ord['items'] = $items;
+    }
+
+    sendJsonResponse(['success' => true, 'orders' => $orders]);
+}
