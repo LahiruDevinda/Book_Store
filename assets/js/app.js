@@ -403,3 +403,57 @@ async function refreshCart() {
     }
 }
 
+function renderCartUI(subTotal, count) {
+    // Badges
+    const badge = document.getElementById('cartBadge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    const priceBadge = document.getElementById('cartTotalBadge');
+    if (priceBadge) {
+        priceBadge.textContent = count > 0 ? `$${Number(subTotal).toFixed(2)}` : '';
+    }
+
+    // Drawer content
+    const container = document.getElementById('cartDrawerItems');
+    const subtotalEl = document.getElementById('cartDrawerSubtotal');
+    if (!container) return;
+
+    if (subtotalEl) {
+        subtotalEl.textContent = `$${Number(subTotal).toFixed(2)}`;
+    }
+
+    if (state.activeCart.length === 0) {
+        container.innerHTML = `
+            <div class="drawer-empty">
+                <div class="drawer-empty-icon">🛍️</div>
+                <div style="font-weight:600; font-size:15px; margin-bottom:4px;">Your cart is empty</div>
+                <div style="font-size:13px;">Find something inspiring to read.</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = state.activeCart.map(item => `
+        <div class="drawer-item">
+            <img src="${item.coverImageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80'}" alt="${escapeHtml(item.title)}" class="drawer-item-thumb">
+            <div class="drawer-item-info">
+                <div>
+                    <div class="drawer-item-title">${escapeHtml(item.title)}</div>
+                    <div class="drawer-item-price">$${Number(item.price).toFixed(2)}</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="updateCartQty(${item.bookid}, -1)">−</button>
+                        <span class="qty-val">${item.quantity}</span>
+                        <button class="qty-btn" onclick="updateCartQty(${item.bookid}, 1)">+</button>
+                    </div>
+                    <button class="drawer-item-remove" onclick="removeFromCart(${item.bookid})">Remove</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
