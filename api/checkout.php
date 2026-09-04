@@ -137,7 +137,39 @@ if ($action === 'place_order') {
             }
             $subTotal += ((float)$item['price'] * $qty);
         }
-    
+        
+        $promoId = null;
+        $discountAmount = 0.00;
+
+        if (!empty($promoCodeStr)) {
+            $stmtPromo = $pdo->prepare("
+                SELECT promoCodeld, type, price, isValid, exp_date
+                FROM PromoCode
+                WHERE code = ? AND userid = ?
+                FOR UPDATE
+            ");
+            $stmtPromo->execute([$promoCodeStr, $userId]);
+            $promo = $stmtPromo->fetch();
+
+            if (!$promo || !(bool)$promo['isValid'] || $promo['exp_date'] < date('Y-m-d')) {
+                $pdo->rollBack();
+                sendJsonResponse(['success' => false, 'message' => 'Promo code is invalid or expired.'], 400);
+            }
+
+            $promoId = (int)$promo['promoCodeld'];
+            $promoVal = (float)$promo['price'];
+
+            if (strtolower($promo['type']) === 'percentage') {
+                $discountAmount = round($subTotal * ($promoVal / 100), 2);
+            } else {
+                $discountAmount = min($subTotal, $promoVal);
+            }
+
+            $stmtInvalidate = $pdo->prepare("UPDATE PromoCode SET isValid = FALSE WHERE promoCodeld = ?");
+            $stmtInvalidate->execute([$promoId]);
+        }
+
+        $finalTotal = max(0.00, round($subTotal - $discountAmount, 2));
 
     } catch (Exception $e) {}
 }    
