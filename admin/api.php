@@ -122,3 +122,19 @@ if ($action === 'add_book') {
         sendJsonResponse(['success' => false, 'message' => 'Failed to add book: ' . $e->getMessage()], 500);
     }
 }
+
+// ======================== UPDATE BOOK STOCK & PRICE ========================
+if ($action === 'update_book') {
+    $bookId = (int)($input['bookid'] ?? 0);
+    $price = (float)($input['price'] ?? 0);
+    $stock = (int)($input['stockQuantity'] ?? 0);
+
+    if ($bookId <= 0 || $price <= 0 || $stock < 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Invalid book details.'], 400);
+    }
+
+    $stmt = $pdo->prepare("UPDATE Book SET price = ?, stockQuantity = ? WHERE bookid = ?");
+    $stmt->execute([$price, $stock, $bookId]);
+
+    sendJsonResponse(['success' => true, 'message' => 'Book updated successfully.']);
+}
