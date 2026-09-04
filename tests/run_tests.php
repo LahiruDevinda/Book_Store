@@ -59,3 +59,5 @@ $admin = $stmtAdm->fetch();
 
 assertCondition($admin && password_verify('Admin@1234', $admin['password']), "Admin password hashed with bcrypt and verifiable");
 assertCondition($admin && (bool)$admin['isAdmin'], "Admin isAdmin flag is TRUE");
+
+echo "\n--- Group 3: LocalStorage Synchronization (The Merge) ---\n";
