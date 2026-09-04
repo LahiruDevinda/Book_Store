@@ -224,3 +224,50 @@ startSecureSession();
                             </div>
                         </div>
                     </div>
+
+                        <!-- Step 2: Promo Code -->
+                    <div style="margin-bottom:20px;">
+                        <h4 style="font-size:14px; font-weight:700; margin-bottom:10px;">2. Promo Code</h4>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="checkoutPromoInput" class="form-control" placeholder="Enter coupon code" style="text-transform:uppercase;">
+                            <button type="button" class="btn btn-secondary btn-sm" id="applyPromoBtn">Apply</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Payment Method -->
+                    <div style="margin-bottom:20px;">
+                        <h4 style="font-size:14px; font-weight:700; margin-bottom:10px;">3. Payment Method</h4>
+                        <div style="display:flex; gap:16px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                                <input type="radio" name="paymentMethod" value="COD" checked>
+                                <span>Cash on Delivery</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                                <input type="radio" name="paymentMethod" value="CARD">
+                                <span>Credit / Debit Card</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Order Summary -->
+                    <div style="border-top:1px solid var(--border-color); padding-top:16px; margin-bottom:20px;">
+                        <h4 style="font-size:14px; font-weight:700; margin-bottom:10px;">Order Summary</h4>
+                        <div id="checkoutItemsReview" style="max-height:120px; overflow-y:auto; margin-bottom:10px;"></div>
+                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
+                            <span style="color:var(--text-muted);">Subtotal:</span>
+                            <span id="checkoutSubtotal">$0.00</span>
+                        </div>
+                        <div id="checkoutDiscountRow" style="display:none; justify-content:space-between; font-size:13px; margin-bottom:4px; color:var(--success);">
+                            <span>Discount Applied:</span>
+                            <span id="checkoutDiscount">−$0.00</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:700; border-top:1px solid var(--border-color); padding-top:8px; margin-top:8px;">
+                            <span>Total Due:</span>
+                            <span id="checkoutFinalTotal">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-block" id="placeOrderBtn">Confirm &amp; Place Order</button>
+                </div>
+            </div>
+        </div>
