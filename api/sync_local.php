@@ -74,6 +74,17 @@ try {
         }
     }
 
+    $pdo->commit();
+
+    $cartCountStmt = $pdo->prepare("SELECT COALESCE(SUM(quantity), 0) FROM Cart_Item WHERE cartid = ?");
+    $cartCountStmt->execute([$cartId]);
+    $totalCartItems = (int)$cartCountStmt->fetchColumn();
+
+    $wishlistCountStmt = $pdo->prepare("SELECT COUNT(*) FROM Wishlist WHERE userid = ?");
+    $wishlistCountStmt->execute([$userId]);
+    $totalWishlistItems = (int)$wishlistCountStmt->fetchColumn();
+
+
 } catch (Exception $e) {
 
 }
