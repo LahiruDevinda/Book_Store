@@ -168,3 +168,36 @@ try {
             'genres' => ['History', 'Philosophy']
         ]
     ];
+
+    $stmtInsertBook = $pdo->prepare("INSERT INTO Book (title, ISBN, price, stockQuantity, coverImageUrl) VALUES (?, ?, ?, ?, ?)");
+    $stmtBridgeAuthor = $pdo->prepare("INSERT IGNORE INTO Book_Author (bookid, authorid) VALUES (?, ?)");
+    $stmtBridgeGenre = $pdo->prepare("INSERT IGNORE INTO Book_Genre (bookid, genreid) VALUES (?, ?)");
+
+    foreach ($books as $b) {
+        $chk = $pdo->prepare("SELECT bookid FROM Book WHERE ISBN = ?");
+        $chk->execute([$b['ISBN']]);
+        $row = $chk->fetch();
+
+        if ($row) {
+            $bookId = $row['bookid'];
+        } else {
+            $stmtInsertBook->execute([$b['title'], $b['ISBN'], $b['price'], $b['stock'], $b['cover']]);
+            $bookId = $pdo->lastInsertId();
+        }
+
+        foreach ($b['authors'] as $authName) {
+            if (isset($authorMap[$authName])) {
+                $stmtBridgeAuthor->execute([$bookId, $authorMap[$authName]]);
+            }
+        }
+
+        foreach ($b['genres'] as $genName) {
+            if (isset($genreMap[$genName])) {
+                $stmtBridgeGenre->execute([$bookId, $genreMap[$genName]]);
+            }
+        }
+    }
+
+    echo "=== Database setup completed successfully! ===\n";
+
+}
