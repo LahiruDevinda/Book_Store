@@ -16,3 +16,28 @@ $data = json_decode($rawPayload, true);
 if (!is_array($data)) {
     $data = ['guest_cart' => [], 'guest_wishlist' => []];
 }
+
+$guestCart = $data['guest_cart'] ?? [];
+$guestWishlist = $data['guest_wishlist'] ?? [];
+
+try {
+
+    $pdo->beginTransaction();
+
+    $stmtCart = $pdo->prepare("SELECT cartid FROM Cart WHERE userid = ? LIMIT 1");
+    $stmtCart->execute([$userId]);
+    $cart = $stmtCart->fetch();
+
+    if (!$cart) {
+        $pdo->prepare("INSERT INTO Cart (userid) VALUES (?)")->execute([$userId]);
+        $cartId = (int)$pdo->lastInsertId();
+    } else {
+        $cartId = (int)$cart['cartid'];
+    }
+
+    $mergedCartCount = 0;
+    $mergedWishlistCount = 0;
+
+} catch (Exception $e) {
+
+}
