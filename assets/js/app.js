@@ -457,3 +457,45 @@ function renderCartUI(subTotal, count) {
     `).join('');
 }
 
+// ======================== WISHLIST LOGIC ========================
+function isBookInWishlist(bookId) {
+    if (state.user) {
+        return state.activeWishlist.some(i => i.bookid == bookId);
+    } else {
+        return state.guestWishlist.includes(bookId);
+    }
+}
+
+async function toggleWishlist(bookId) {
+    if (state.user) {
+        try {
+            const res = await fetch('api/wishlist.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'toggle', bookid: bookId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message);
+                await refreshWishlist();
+                renderBooks();
+            }
+        } catch (e) {
+            showToast('Error updating wishlist.', 'error');
+        }
+    } else {
+        loadLocalGuestData();
+        const index = state.guestWishlist.indexOf(bookId);
+        if (index > -1) {
+            state.guestWishlist.splice(index, 1);
+            showToast('Removed from wishlist.');
+        } else {
+            state.guestWishlist.push(bookId);
+            showToast('Added to wishlist.');
+        }
+        saveLocalGuestWishlist();
+        await refreshWishlist();
+        renderBooks();
+    }
+}
+
