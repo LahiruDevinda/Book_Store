@@ -82,3 +82,80 @@ if ($action === 'login') {
         'user'    => $_SESSION['user']
     ]);
 }
+
+// ======================== USER REGISTRATION ========================
+if ($action === 'register') {
+    $firstName = trim($input['firstName'] ?? '');
+    $lastName = trim($input['lastName'] ?? '');
+    $email = trim($input['email'] ?? '');
+    $password = $input['password'] ?? '';
+
+    if (empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
+        sendJsonResponse(['success' => false, 'message' => 'All fields are required.'], 400);
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        sendJsonResponse(['success' => false, 'message' => 'Please provide a valid email address.'], 400);
+    }
+
+    if (strlen($password) < 6) {
+        sendJsonResponse(['success' => false, 'message' => 'Password must be at least 6 characters long.'], 400);
+    }
+
+    // Check duplicate email
+    $stmtCheck = $pdo->prepare("SELECT userid FROM Users WHERE email = ? LIMIT 1");
+    $stmtCheck->execute([$email]);
+    if ($stmtCheck->fetch()) {
+        sendJsonResponse(['success' => false, 'message' => 'An account with this email address already exists.'], 409);
+    }
+
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
+    try {
+        $pdo->beginTransaction();
+
+        $stmtInsert = $pdo->prepare("
+            INSERT INTO Users (firstName, lastName, email, password, isAdmin)
+            VALUES (?, ?, ?, ?, 0)
+        ");
+        $stmtInsert->execute([$firstName, $lastName, $email, $hashedPassword]);
+        $newUserId = (int)$pdo->lastInsertId();
+
+        // Initialize User Cart
+        $pdo->prepare("INSERT INTO Cart (userid) VALUES (?)")->execute([$newUserId]);
+
+        // Generate a 15% Welcome Promo Code
+        $welcomePromo = 'WELCOME' . strtoupper(substr(md5(uniqid('', true)), 0, 4));
+        $expDate = date('Y-m-d', strtotime('+30 days'));
+        $stmtPromo = $pdo->prepare("
+            INSERT INTO PromoCode (userid, code, type, price, isValid, exp_date)
+            VALUES (?, ?, 'percentage', 15.00, 1, ?)
+        ");
+        $stmtPromo->execute([$newUserId, $welcomePromo, $expDate]);
+
+        $pdo->commit();
+
+        // Set session
+        $_SESSION['user'] = [
+            'userid'    => $newUserId,
+            'firstName' => $firstName,
+            'lastName'  => $lastName,
+            'email'     => $email,
+            'isAdmin'   => false
+        ];
+
+        sendJsonResponse([
+            'success'     => true,
+            'message'     => 'Registration successful! Welcome to BookStore.',
+            'user'        => $_SESSION['user'],
+            'welcomeCode' => $welcomePromo
+        ]);
+
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Registration error: " . $e->getMessage());
+        sendJsonResponse(['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()], 500);
+    }
+}
