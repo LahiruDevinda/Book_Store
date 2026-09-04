@@ -243,3 +243,6 @@ if ($action === 'get_orders') {
 
     sendJsonResponse(['success' => true, 'orders' => $orders]);
 }
+
+// ======================== INVALID ACTION HANDLER ========================
+sendJsonResponse(['success' => false, 'message' => 'Invalid action.'], 400);
