@@ -199,3 +199,83 @@ function renderGenrePills() {
         });
     });
 }
+
+async function loadBooks() {
+    const grid = document.getElementById('bookGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px 0; color:var(--text-muted);">Loading books...</div>';
+
+    let url = `api/books.php?sort=${encodeURIComponent(state.currentSort)}`;
+    if (state.currentGenre > 0) {
+        url += `&genre=${state.currentGenre}`;
+    }
+    if (state.searchQuery.trim()) {
+        url += `&search=${encodeURIComponent(state.searchQuery.trim())}`;
+    }
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.success) {
+            state.books = data.books || [];
+            renderBooks();
+        }
+    } catch (e) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px 0; color:var(--danger);">Failed to load books.</div>';
+    }
+}
+
+function renderBooks() {
+    const grid = document.getElementById('bookGrid');
+    const countEl = document.getElementById('resultsCount');
+    if (!grid) return;
+
+    if (countEl) {
+        countEl.innerHTML = `Showing <strong>${state.books.length}</strong> title${state.books.length === 1 ? '' : 's'}`;
+    }
+
+    if (state.books.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align:center; padding: 60px 20px;">
+                <div style="font-size:32px; margin-bottom:12px;">📖</div>
+                <h3 style="font-size:18px; font-weight:700; margin-bottom:6px;">No books found</h3>
+                <p style="color:var(--text-muted); font-size:14px;">Try refining your search terms or genre filter.</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = state.books.map(b => {
+        const isWishlisted = isBookInWishlist(b.bookid);
+        const isOutOfStock = b.stockQuantity <= 0;
+
+        return `
+            <div class="book-card" data-id="${b.bookid}">
+                <div class="book-card-media" onclick="openBookDetailsModal(${b.bookid})">
+                    <img src="${b.coverImageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80'}" alt="${escapeHtml(b.title)}" class="book-card-cover" loading="lazy">
+                    <button class="book-wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="event.stopPropagation(); toggleWishlist(${b.bookid})" title="Wishlist">
+                        ${isWishlisted ? '❤️' : '🤍'}
+                    </button>
+                    ${isOutOfStock ? `<span class="stock-tag out-of-stock">Out of Stock</span>` : ''}
+                </div>
+                <div class="book-card-body">
+                    <div class="book-genres">${escapeHtml(b.genres || 'Literature')}</div>
+                    <h3 class="book-title" onclick="openBookDetailsModal(${b.bookid})">${escapeHtml(b.title)}</h3>
+                    <div class="book-authors">${escapeHtml(b.authors || 'Unknown Author')}</div>
+                    <div class="book-rating">
+                        <span class="star-icon">★</span>
+                        <strong style="color:var(--text-main);">${b.avgRating > 0 ? b.avgRating : 'New'}</strong>
+                        ${b.reviewCount > 0 ? `<span>(${b.reviewCount})</span>` : ''}
+                    </div>
+                    <div class="book-card-footer">
+                        <div class="book-price">$${Number(b.price).toFixed(2)}</div>
+                        <button class="btn btn-secondary btn-sm" ${isOutOfStock ? 'disabled' : ''} onclick="addToCart(${b.bookid})">
+                            ${isOutOfStock ? 'Sold Out' : '+ Add'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
