@@ -129,14 +129,76 @@ $adminUser = $_SESSION['user'];
     <!-- ==================== INVENTORY TAB ==================== -->
     <section id="tab-inventory" class="admin-panel">
       <!-- Panel Header -->
-      <div class="panel-header"></div>
-      
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Catalog Inventory</h1>
+          <p class="panel-subtitle">Manage books, adjust pricing, and balance warehouse stock.</p>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="openAddBookModalBtn">+ Add New Book</button>
+        </div>
+      </div>
+
       <!-- Inventory Table -->
-      <div class="table-card"></div>
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cover</th>
+                <th>Title & ISBN</th>
+                <th>Authors</th>
+                <th>Genres</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <tr>
+                <td colspan="7" class="text-center py-4">Loading catalog...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- ==================== ORDERS AUDIT TAB ==================== -->
-    <section id="tab-orders" class="admin-panel"></section>
+    <section id="tab-orders" class="admin-panel">
+      <!-- Panel Header -->
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Customer Orders Audit</h1>
+          <p class="panel-subtitle">Historical records with permanently locked purchase unit prices.</p>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Delivery Address</th>
+                <th>Items & Locked Prices</th>
+                <th>Subtotal</th>
+                <th>Payment</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <tr>
+                <td colspan="8" class="text-center py-4">Loading orders...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
     <!-- ==================== AUTHORS & GENRES TAB ==================== -->
     <section id="tab-taxonomies" class="admin-panel"></section>
