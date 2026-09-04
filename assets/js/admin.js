@@ -229,3 +229,13 @@ async function loadTaxonomies() {
     }
 }
 
+function renderAuthorsList() {
+    const list = document.getElementById('authorsList');
+    if (!list) return;
+    list.innerHTML = cachedAuthors.map(a => `
+        <div style="padding:8px 12px; background:var(--bg-canvas); border-radius:6px; font-size:13px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+            <strong>${escapeHtml(a.name)}</strong>
+            <span style="font-size:11px; color:var(--text-muted);">#${a.authorid}</span>
+        </div>
+    `).join('');
+}
