@@ -84,7 +84,7 @@ $adminUser = $_SESSION['user'];
         <span class="admin-username">
           <?= htmlspecialchars($adminUser['firstName'] . ' ' . $adminUser['lastName']); ?>
         </span>
-        <a href="../index.php" class="btn btn-secondary btn-sm">Storefront</a>
+        <a href="../index.php" class="btn btn-secondary btn-sm" style="text-decoration:none;">Storefront</a>
         <button id="adminLogoutBtn" class="btn btn-secondary btn-sm">Sign Out</button>
       </div>
     </div>
