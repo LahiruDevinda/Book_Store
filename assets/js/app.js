@@ -119,3 +119,20 @@ function renderHeaderUserUI() {
         document.getElementById('openAuthModalBtn').addEventListener('click', () => openAuthModal('login'));
     }
 }
+
+async function handleLogout() {
+    try {
+        await fetch('auth.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'logout' })
+        });
+        state.user = null;
+        renderHeaderUserUI();
+        showToast('Signed out successfully.');
+        await refreshCart();
+        await refreshWishlist();
+    } catch (e) {
+        console.error('Logout error', e);
+    }
+}
