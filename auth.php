@@ -159,3 +159,14 @@ if ($action === 'register') {
         sendJsonResponse(['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()], 500);
     }
 }
+
+// ======================== USER LOGOUT ========================
+if ($action === 'logout') {
+    unset($_SESSION['user']);
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
+    sendJsonResponse(['success' => true, 'message' => 'Successfully logged out.']);
+}
+
+sendJsonResponse(['success' => false, 'message' => 'Invalid action.'], 400);
