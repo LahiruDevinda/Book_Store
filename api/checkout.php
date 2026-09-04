@@ -53,3 +53,52 @@ if ($action === 'validate_promo') {
         ]
     ]);
 }
+
+if ($action === 'place_order') {
+    $addressId = !empty($input['addressid']) ? (int)$input['addressid'] : null;
+    $newAddress = $input['newAddress'] ?? null;
+    $promoCodeStr = trim($input['promoCode'] ?? '');
+    $paymentMethod = strtoupper(trim($input['paymentMethod'] ?? 'COD'));
+
+    if (!in_array($paymentMethod, ['COD', 'CARD'])) {
+        $paymentMethod = 'COD';
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+         if ($addressId) {
+            $stmtAddr = $pdo->prepare("SELECT addressid FROM AddressBook WHERE addressid = ? AND userid = ?");
+            $stmtAddr->execute([$addressId, $userId]);
+            if (!$stmtAddr->fetch()) {
+                $pdo->rollBack();
+                sendJsonResponse(['success' => false, 'message' => 'Delivery address not found.'], 400);
+            }
+        } elseif ($newAddress && is_array($newAddress)) {
+            $no = trim($newAddress['no'] ?? '');
+            $street = trim($newAddress['street'] ?? '');
+            $zipCode = trim($newAddress['zipCode'] ?? '');
+
+            if (empty($no) || empty($street) || empty($zipCode)) {
+                $pdo->rollBack();
+                sendJsonResponse(['success' => false, 'message' => 'Please provide complete address details.'], 400);
+            }
+
+            $stmtInsAddr = $pdo->prepare("INSERT INTO AddressBook (userid, no, street, zipCode) VALUES (?, ?, ?, ?)");
+            $stmtInsAddr->execute([$userId, $no, $street, $zipCode]);
+            $addressId = (int)$pdo->lastInsertId();
+        } else {
+            $stmtDefaultAddr = $pdo->prepare("SELECT addressid FROM AddressBook WHERE userid = ? ORDER BY addressid DESC LIMIT 1");
+            $stmtDefaultAddr->execute([$userId]);
+            $defaultAddr = $stmtDefaultAddr->fetch();
+            if ($defaultAddr) {
+                $addressId = (int)$defaultAddr['addressid'];
+            } else {
+                $pdo->rollBack();
+                sendJsonResponse(['success' => false, 'message' => 'Please enter a delivery address.'], 400);
+            }
+        }
+
+        
+    } catch (Exception $e) {}
+}    
