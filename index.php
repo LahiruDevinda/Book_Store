@@ -60,3 +60,14 @@ startSecureSession();
                 </div>
             </div>
         </header>
+
+            <!-- ======================== MINIMALIST HERO ======================== -->
+        <section class="hero-minimal">
+            <div class="container hero-content">
+                <span class="hero-subtitle">Curated Collection</span>
+                <h1 class="hero-title serif-heading">Stories, crafted thoughts &amp; timeless literature.</h1>
+                <p class="hero-description">
+                    Explore handpicked engineering classics, philosophical masterworks, and thought-provoking fiction.
+                </p>
+            </div>
+        </section>
