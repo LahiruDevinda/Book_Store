@@ -164,3 +164,16 @@ try {
     $invalidRateThrew = true;
 }
 assertCondition($invalidRateThrew, "Rate CHECK constraint enforced (rate > 5 rejected by database)");
+
+echo "\n--- Group 6: UI Privacy & Minimalism Compliance ---\n";
+$indexContent = file_get_contents(__DIR__ . '/../index.php');
+$dashboardContent = file_get_contents(__DIR__ . '/../admin/dashboard.php');
+
+$hasJohnInIndex = stripos($indexContent, 'john@example.com') !== false;
+$hasAdminCredsInIndex = stripos($indexContent, 'admin@bookstore.com') !== false;
+$hasTechBadgesInIndex = stripos($indexContent, 'Vanilla JS') !== false || stripos($indexContent, 'PDO MySQL') !== false;
+
+assertCondition(!$hasJohnInIndex, "Storefront UI strictly does not expose demo customer account");
+assertCondition(!$hasAdminCredsInIndex, "Storefront UI strictly does not expose demo admin credentials");
+assertCondition(!$hasTechBadgesInIndex, "Storefront UI strictly does not display used languages / tech stack badges");
+
