@@ -44,3 +44,18 @@ assertCondition(checkCompositePk($pdo, 'Book_Author', ['bookid', 'authorid']), "
 assertCondition(checkCompositePk($pdo, 'Wishlist', ['userid', 'bookid']), "Wishlist composite PK (userid, bookid)");
 assertCondition(checkCompositePk($pdo, 'Cart_Item', ['cartid', 'bookid']), "Cart_Item composite PK (cartid, bookid)");
 assertCondition(checkCompositePk($pdo, 'Order_Item', ['orderid', 'bookid']), "Order_Item composite PK (orderid, bookid)");
+
+echo "\n--- Group 2: Authentication & Security ---\n";
+$stmtCust = $pdo->prepare("SELECT * FROM Users WHERE email = ?");
+$stmtCust->execute(['john@example.com']);
+$john = $stmtCust->fetch();
+
+assertCondition($john && password_verify('User@1234', $john['password']), "Customer password hashed with bcrypt and verifiable");
+assertCondition($john && !(bool)$john['isAdmin'], "Customer isAdmin flag is FALSE");
+
+$stmtAdm = $pdo->prepare("SELECT * FROM Users WHERE email = ?");
+$stmtAdm->execute(['admin@bookstore.com']);
+$admin = $stmtAdm->fetch();
+
+assertCondition($admin && password_verify('Admin@1234', $admin['password']), "Admin password hashed with bcrypt and verifiable");
+assertCondition($admin && (bool)$admin['isAdmin'], "Admin isAdmin flag is TRUE");
