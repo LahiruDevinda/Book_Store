@@ -111,3 +111,22 @@ CREATE TABLE IF NOT EXISTS Wishlist (
     FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE,
     FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Cart_Item (
+    cartid INT,
+    bookid INT,
+    quantity INT DEFAULT 1,
+    PRIMARY KEY (cartid, bookid),
+    FOREIGN KEY (cartid) REFERENCES Cart(cartid) ON DELETE CASCADE,
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Order_Item (
+    orderid INT,
+    bookid INT,
+    unitPrice DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    PRIMARY KEY (orderid, bookid),
+    FOREIGN KEY (orderid) REFERENCES Orders(orderid) ON DELETE CASCADE,
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
