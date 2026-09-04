@@ -23,3 +23,15 @@ const state = {
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
 });
+
+async function initApp() {
+    loadLocalGuestData();
+    setupEventListeners();
+    await checkAuthStatus();
+    await Promise.all([
+        loadGenres(),
+        loadBooks()
+    ]);
+    await refreshCart();
+    await refreshWishlist();
+}
