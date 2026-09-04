@@ -102,3 +102,8 @@ $testPromoCode = 'TESTPROMO_' . time();
 $pdo->prepare("INSERT INTO PromoCode (userid, code, type, price, isValid, exp_date) VALUES (?, ?, 'percentage', 10.00, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY))")
     ->execute([$testUserId, $testPromoCode]);
 $testPromoId = (int)$pdo->lastInsertId();
+
+$stmtChkPromo = $pdo->prepare("SELECT * FROM PromoCode WHERE code = ? AND userid = ? AND isValid = 1");
+$stmtChkPromo->execute([$testPromoCode, $testUserId]);
+$validPromo = $stmtChkPromo->fetch();
+assertCondition(!empty($validPromo), "Active promo code found and verified");
