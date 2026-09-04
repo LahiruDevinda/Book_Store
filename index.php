@@ -192,3 +192,35 @@ startSecureSession();
                 </div>
             </div>
         </div>
+
+            <!-- ======================== CHECKOUT MODAL ======================== -->
+        <div class="modal-overlay hidden" id="checkoutModal">
+            <div class="modal-dialog" style="max-width:540px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Complete Your Order</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body" id="checkoutModalBody">
+                    <!-- Step 1: Delivery Address -->
+                    <div style="margin-bottom:20px;">
+                        <h4 style="font-size:14px; font-weight:700; margin-bottom:10px;">1. Delivery Address</h4>
+                        <div id="checkoutAddressList">
+                            <!-- Addresses injected via JS -->
+                        </div>
+                        <div id="newAddressFields" style="display:none; margin-top:10px; padding:12px; background:var(--bg-subtle); border-radius:var(--radius-sm);">
+                            <div class="form-group-row">
+                                <div class="form-group">
+                                    <label class="form-label">Unit / No</label>
+                                    <input type="text" id="addrNo" class="form-control" placeholder="Apt 4B">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Postal Code</label>
+                                    <input type="text" id="addrZip" class="form-control" placeholder="10001">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Street Address</label>
+                                <input type="text" id="addrStreet" class="form-control" placeholder="123 Main Street">
+                            </div>
+                        </div>
+                    </div>
