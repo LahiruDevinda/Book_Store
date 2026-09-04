@@ -35,3 +35,25 @@ async function initApp() {
     await refreshCart();
     await refreshWishlist();
 }
+
+// ======================== LOCAL STORAGE (GUEST) ========================
+function loadLocalGuestData() {
+    try {
+        state.guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+    } catch (e) {
+        state.guestCart = [];
+    }
+    try {
+        state.guestWishlist = JSON.parse(localStorage.getItem('guest_wishlist')) || [];
+    } catch (e) {
+        state.guestWishlist = [];
+    }
+}
+
+function saveLocalGuestCart() {
+    localStorage.setItem('guest_cart', JSON.stringify(state.guestCart));
+}
+
+function saveLocalGuestWishlist() {
+    localStorage.setItem('guest_wishlist', JSON.stringify(state.guestWishlist));
+}
