@@ -58,3 +58,12 @@ function getDBConnection(bool $selectDb = true): PDO {
     error_log("Database Connection Error: " . ($lastException ? $lastException->getMessage() : 'Access denied'));
     throw new PDOException("Database connection failed: " . ($lastException ? $lastException->getMessage() : 'Access denied'), 1045);
 }
+
+function sendJsonResponse(array $data, int $statusCode = 200): void {
+    if (!headers_sent()) {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+    }
+    echo json_encode($data);
+    exit;
+}
