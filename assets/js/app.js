@@ -893,3 +893,103 @@ async function openBookDetailsModal(bookId) {
         container.innerHTML = '<div style="color:var(--danger); text-align:center; padding:20px;">Failed to load details.</div>';
     }
 }
+
+async function handleReviewSubmit(e, bookId) {
+    e.preventDefault();
+    const rate = parseInt(document.getElementById('reviewRatingSelect').value);
+    const description = document.getElementById('reviewTextarea').value.trim();
+
+    if (!description) return;
+
+    try {
+        const res = await fetch('api/reviews.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookid: bookId, rate: rate, description: description })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Review submitted!');
+            openBookDetailsModal(bookId);
+            loadBooks(); // Update card average
+        } else {
+            showToast(data.message || 'Failed to submit review.', 'error');
+        }
+    } catch (err) {
+        showToast('Error submitting review.', 'error');
+    }
+}
+
+// ======================== AUTH MODAL & LOGIC ========================
+function openAuthModal(tab = 'login', notice = '') {
+    const modal = document.getElementById('authModal');
+    if (!modal) return;
+
+    const noticeEl = document.getElementById('authNotice');
+    if (noticeEl) {
+        if (notice) {
+            noticeEl.textContent = notice;
+            noticeEl.style.display = 'block';
+        } else {
+            noticeEl.style.display = 'none';
+        }
+    }
+
+    switchAuthTab(tab);
+    modal.classList.remove('hidden');
+}
+
+function switchAuthTab(tab) {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginTabBtn = document.getElementById('loginTabBtn');
+    const registerTabBtn = document.getElementById('registerTabBtn');
+
+    if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        loginTabBtn.classList.add('active');
+        registerTabBtn.classList.remove('active');
+    } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        loginTabBtn.classList.remove('active');
+        registerTabBtn.classList.add('active');
+    }
+}
+
+async function handleLoginSubmit(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const res = await fetch('auth.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'login', email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+            state.user = data.user;
+            renderHeaderUserUI();
+            showToast(data.message);
+            document.getElementById('authModal').classList.add('hidden');
+
+            // Perform synchronization of guest localStorage data
+            await performGuestSync();
+            await refreshCart();
+            await refreshWishlist();
+
+            // Resume checkout if user was checking out
+            if (state.isCheckingOut) {
+                state.isCheckingOut = false;
+                openCheckoutModal();
+            }
+        } else {
+            showToast(data.message || 'Login failed.', 'error');
+        }
+    } catch (e) {
+        showToast('Login request error.', 'error');
+    }
+}
