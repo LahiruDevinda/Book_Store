@@ -78,3 +78,18 @@ try {
             $authorMap[$a[0]] = $pdo->lastInsertId();
         }
     }
+
+  $genres = ['Software Engineering', 'Science Fiction', 'Classic Literature', 'History', 'Philosophy', 'Dystopian'];
+    $genreMap = [];
+    $stmtGenre = $pdo->prepare("INSERT INTO Genre (genreName) VALUES (?)");
+    foreach ($genres as $g) {
+        $chk = $pdo->prepare("SELECT genreid FROM Genre WHERE genreName = ?");
+        $chk->execute([$g]);
+        $row = $chk->fetch();
+        if ($row) {
+            $genreMap[$g] = $row['genreid'];
+        } else {
+            $stmtGenre->execute([$g]);
+            $genreMap[$g] = $pdo->lastInsertId();
+        }
+    }  
