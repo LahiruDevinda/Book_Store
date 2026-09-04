@@ -127,7 +127,13 @@ $adminUser = $_SESSION['user'];
     </section>
 
     <!-- ==================== INVENTORY TAB ==================== -->
-    <section id="tab-inventory" class="admin-panel"></section>
+    <section id="tab-inventory" class="admin-panel">
+      <!-- Panel Header -->
+      <div class="panel-header"></div>
+      
+      <!-- Inventory Table -->
+      <div class="table-card"></div>
+    </section>
 
     <!-- ==================== ORDERS AUDIT TAB ==================== -->
     <section id="tab-orders" class="admin-panel"></section>
