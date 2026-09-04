@@ -127,3 +127,29 @@ window.openEditModal = function(bookId) {
 
     document.getElementById('editBookModal').classList.remove('hidden');
 };
+
+// Delete a book from the inventory after confirmation
+window.deleteBook = async function(bookId, title) {
+    if (!confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)) {
+        return;
+    }
+    try {
+        const res = await fetch('api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete_book', bookid: bookId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAdminAlert('Book deleted successfully.');
+            loadInventory();
+            loadStats();
+        } else {
+            alert(data.message || 'Failed to delete book.');
+        }
+    } catch (e) {
+        alert('An error occurred.');
+    }
+};
+
+
