@@ -320,6 +320,8 @@ $adminUser = $_SESSION['user'];
       </form>
     </div>
   </div>
+
+  <script src="../assets/js/admin.js"></script>
 </body>
 
 </html>
