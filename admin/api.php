@@ -184,3 +184,21 @@ if ($action === 'add_author') {
 
     sendJsonResponse(['success' => true, 'message' => 'Author created!', 'authorid' => (int)$pdo->lastInsertId()]);
 }
+
+// ======================== GET / ADD GENRES ========================
+if ($action === 'get_genres') {
+    $stmt = $pdo->query("SELECT genreid, genreName FROM Genre ORDER BY genreName ASC");
+    sendJsonResponse(['success' => true, 'genres' => $stmt->fetchAll()]);
+}
+
+if ($action === 'add_genre') {
+    $name = trim($input['genreName'] ?? '');
+    if (empty($name)) {
+        sendJsonResponse(['success' => false, 'message' => 'Genre name is required.'], 400);
+    }
+
+    $stmt = $pdo->prepare("INSERT IGNORE INTO Genre (genreName) VALUES (?)");
+    $stmt->execute([$name]);
+
+    sendJsonResponse(['success' => true, 'message' => 'Genre saved!', 'genreid' => (int)$pdo->lastInsertId()]);
+}
