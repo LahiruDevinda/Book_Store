@@ -97,7 +97,16 @@ $adminUser = $_SESSION['user'];
     <div id="adminAlert" class="alert-box hidden"></div>
 
     <!-- ==================== OVERVIEW TAB ==================== -->
-    <section id="tab-overview" class="admin-panel active"></section>
+    <section id="tab-overview" class="admin-panel active">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">System Overview</h1>
+          <p class="panel-subtitle">Real-time summary of catalog inventory and customer orders.</p>
+        </div>
+      </div>
+
+      <div class="stats-grid"></div>
+    </section>
 
     <!-- ==================== INVENTORY TAB ==================== -->
     <section id="tab-inventory" class="admin-panel"></section>
