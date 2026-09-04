@@ -107,3 +107,32 @@ $stmtChkPromo = $pdo->prepare("SELECT * FROM PromoCode WHERE code = ? AND userid
 $stmtChkPromo->execute([$testPromoCode, $testUserId]);
 $validPromo = $stmtChkPromo->fetch();
 assertCondition(!empty($validPromo), "Active promo code found and verified");
+
+$pdo->beginTransaction();
+$cartItemsStmt = $pdo->prepare("SELECT ci.bookid, ci.quantity, b.price, b.stockQuantity FROM Cart_Item ci JOIN Book b ON ci.bookid = b.bookid WHERE ci.cartid = ?");
+$cartItemsStmt->execute([$testCartId]);
+$orderItems = $cartItemsStmt->fetchAll();
+
+$subTotal = 0.00;
+foreach ($orderItems as $it) {
+    $subTotal += (float)$it['price'] * (int)$it['quantity'];
+}
+$discount = round($subTotal * 0.10, 2);
+$finalTotal = round($subTotal - $discount, 2);
+
+$stmtInsOrder = $pdo->prepare("INSERT INTO Orders (userid, addressid, promoCodeld, subTotal, orderStatus) VALUES (?, ?, ?, ?, 'Completed')");
+$stmtInsOrder->execute([$testUserId, $testAddrId, $testPromoId, $finalTotal]);
+$orderId = (int)$pdo->lastInsertId();
+
+$stmtInsOrderItem = $pdo->prepare("INSERT INTO Order_Item (orderid, bookid, unitPrice, quantity) VALUES (?, ?, ?, ?)");
+$stmtDeduct = $pdo->prepare("UPDATE Book SET stockQuantity = stockQuantity - ? WHERE bookid = ?");
+
+$firstBookPrice = (float)$orderItems[0]['price'];
+foreach ($orderItems as $it) {
+    $stmtInsOrderItem->execute([$orderId, $it['bookid'], $it['price'], $it['quantity']]);
+    $stmtDeduct->execute([$it['quantity'], $it['bookid']]);
+}
+
+$pdo->prepare("UPDATE PromoCode SET isValid = 0 WHERE promoCodeld = ?")->execute([$testPromoId]);
+$pdo->prepare("DELETE FROM Cart_Item WHERE cartid = ?")->execute([$testCartId]);
+$pdo->commit();
