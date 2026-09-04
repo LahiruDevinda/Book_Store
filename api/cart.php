@@ -184,3 +184,29 @@ if ($action === 'add') {
 
     sendJsonResponse(['success' => true, 'message' => 'Added to cart!']);
 }
+
+if ($action === 'update') {
+    $bookId = (int)($input['bookid'] ?? 0);
+    $quantity = (int)($input['quantity'] ?? 1);
+
+    if ($bookId <= 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Invalid book ID.'], 400);
+    }
+
+    if ($quantity <= 0) {
+        $stmt = $pdo->prepare("DELETE FROM Cart_Item WHERE cartid = ? AND bookid = ?");
+        $stmt->execute([$cartId, $bookId]);
+        sendJsonResponse(['success' => true, 'message' => 'Item removed from cart.']);
+    } else {
+        $chkBook = $pdo->prepare("SELECT stockQuantity FROM Book WHERE bookid = ?");
+        $chkBook->execute([$bookId]);
+        $book = $chkBook->fetch();
+        if ($book && (int)$book['stockQuantity'] < $quantity) {
+            sendJsonResponse(['success' => false, 'message' => 'Quantity exceeds available stock.'], 400);
+        }
+
+        $stmt = $pdo->prepare("UPDATE Cart_Item SET quantity = ? WHERE cartid = ? AND bookid = ?");
+        $stmt->execute([$quantity, $cartId, $bookId]);
+        sendJsonResponse(['success' => true, 'message' => 'Cart updated.']);
+    }
+}
