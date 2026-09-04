@@ -279,3 +279,37 @@ function renderBooks() {
         `;
     }).join('');
 }
+
+// ======================== CART LOGIC ========================
+async function addToCart(bookId) {
+    if (state.user) {
+        try {
+            const res = await fetch('api/cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add', bookid: bookId, quantity: 1 })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Added to cart.');
+                await refreshCart();
+            } else {
+                showToast(data.message || 'Could not add to cart.', 'error');
+            }
+        } catch (e) {
+            showToast('Error adding to cart.', 'error');
+        }
+    } else {
+        // Guest cart
+        loadLocalGuestData();
+        const existing = state.guestCart.find(i => i.bookid == bookId);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            state.guestCart.push({ bookid: bookId, quantity: 1 });
+        }
+        saveLocalGuestCart();
+        showToast('Added to cart.');
+        await refreshCart();
+    }
+}
