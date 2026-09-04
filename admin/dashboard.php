@@ -60,7 +60,13 @@ $adminUser = $_SESSION['user'];
   <!-- Admin navigation -->
   <header class="admin-header">
     <div class="header-inner container">
-      
+      <div class="brand-area">
+        <a href="dashboard.php" class="brand-logo">
+          <span class="brand-icon">📚</span>
+          <span class="brand-name">BookStore<span class="brand-dot">.</span></span>
+          <span class="admin-badge">Admin</span>
+        </a>
+      </div>
     </div>
   </header>
 
