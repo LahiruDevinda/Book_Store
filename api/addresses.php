@@ -47,3 +47,5 @@ if ($method === 'POST') {
         ]
     ]);
 }
+
+sendJsonResponse(['success' => false, 'message' => 'Method not allowed.'], 405);
