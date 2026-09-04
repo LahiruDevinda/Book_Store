@@ -114,3 +114,16 @@ async function loadInventory() {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Failed to load inventory.</td></tr>';
     }
 }
+
+// Open the edit book modal and populate it with the selected book's data
+window.openEditModal = function(bookId) {
+    const book = cachedBooks.find(b => b.bookid == bookId);
+    if (!book) return;
+
+    document.getElementById('editBookId').value = book.bookid;
+    document.getElementById('editBookTitleLabel').textContent = book.title;
+    document.getElementById('editBookPrice').value = book.price;
+    document.getElementById('editBookStock').value = book.stockQuantity;
+
+    document.getElementById('editBookModal').classList.remove('hidden');
+};
