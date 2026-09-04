@@ -313,3 +313,93 @@ async function addToCart(bookId) {
         await refreshCart();
     }
 }
+
+async function updateCartQty(bookId, delta) {
+    if (state.user) {
+        const item = state.activeCart.find(i => i.bookid == bookId);
+        if (!item) return;
+        const newQty = item.quantity + delta;
+        try {
+            const res = await fetch('api/cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update', bookid: bookId, quantity: newQty })
+            });
+            const data = await res.json();
+            if (data.success) {
+                await refreshCart();
+            } else {
+                showToast(data.message || 'Update failed', 'error');
+            }
+        } catch (e) {
+            showToast('Error updating cart', 'error');
+        }
+    } else {
+        loadLocalGuestData();
+        const item = state.guestCart.find(i => i.bookid == bookId);
+        if (!item) return;
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+            state.guestCart = state.guestCart.filter(i => i.bookid != bookId);
+        }
+        saveLocalGuestCart();
+        await refreshCart();
+    }
+}
+
+async function removeFromCart(bookId) {
+    if (state.user) {
+        try {
+            const res = await fetch('api/cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'remove', bookid: bookId })
+            });
+            await refreshCart();
+        } catch (e) {
+            showToast('Failed to remove item', 'error');
+        }
+    } else {
+        loadLocalGuestData();
+        state.guestCart = state.guestCart.filter(i => i.bookid != bookId);
+        saveLocalGuestCart();
+        await refreshCart();
+    }
+}
+
+async function refreshCart() {
+    if (state.user) {
+        try {
+            const res = await fetch('api/cart.php?action=get');
+            const data = await res.json();
+            if (data.success) {
+                state.activeCart = data.items || [];
+                renderCartUI(data.subTotal || 0, data.count || 0);
+            }
+        } catch (e) {
+            console.error('Error fetching auth cart', e);
+        }
+    } else {
+        loadLocalGuestData();
+        if (state.guestCart.length === 0) {
+            state.activeCart = [];
+            renderCartUI(0, 0);
+            return;
+        }
+        try {
+            const res = await fetch('api/cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hydrate', items: state.guestCart })
+            });
+            const data = await res.json();
+            if (data.success) {
+                state.activeCart = data.items || [];
+                renderCartUI(data.subTotal || 0, data.count || 0);
+            }
+        } catch (e) {
+            console.error('Error hydrating guest cart', e);
+        }
+    }
+}
+
