@@ -269,3 +269,173 @@ function renderModalGenres() {
         </label>
     `).join('');
 }
+
+// ======================== FORMS & MODALS ========================
+function setupForms() {
+    // Add Book Modal triggers
+    const addBtn = document.getElementById('openAddBookModalBtn');
+    const addModal = document.getElementById('addBookModal');
+    const closeAddBtn = document.getElementById('closeAddBookModal');
+    const cancelAddBtn = document.getElementById('cancelAddBookBtn');
+
+    if (addBtn) addBtn.addEventListener('click', () => addModal.classList.remove('hidden'));
+    if (closeAddBtn) closeAddBtn.addEventListener('click', () => addModal.classList.add('hidden'));
+    if (cancelAddBtn) cancelAddBtn.addEventListener('click', () => addModal.classList.add('hidden'));
+
+    // Edit Book Modal triggers
+    const editModal = document.getElementById('editBookModal');
+    const closeEditBtn = document.getElementById('closeEditBookModal');
+    const cancelEditBtn = document.getElementById('cancelEditBookBtn');
+
+    if (closeEditBtn) closeEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+
+    // Submit Add Book
+    const addBookForm = document.getElementById('addBookForm');
+    if (addBookForm) {
+        addBookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(addBookForm);
+            const authorIds = Array.from(addBookForm.querySelectorAll('input[name="authorIds[]"]:checked')).map(cb => parseInt(cb.value));
+            const genreIds = Array.from(addBookForm.querySelectorAll('input[name="genreIds[]"]:checked')).map(cb => parseInt(cb.value));
+
+            const payload = {
+                action: 'add_book',
+                title: formData.get('title'),
+                ISBN: formData.get('ISBN'),
+                price: parseFloat(formData.get('price')),
+                stockQuantity: parseInt(formData.get('stockQuantity')),
+                coverImageUrl: formData.get('coverImageUrl'),
+                authorIds: authorIds,
+                genreIds: genreIds
+            };
+
+            try {
+                const res = await fetch('api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminAlert('Book saved successfully!');
+                    addBookForm.reset();
+                    addModal.classList.add('hidden');
+                    loadInventory();
+                    loadStats();
+                } else {
+                    alert(data.message || 'Failed to add book.');
+                }
+            } catch (err) {
+                alert('An error occurred.');
+            }
+        });
+    }
+
+    // Submit Quick Edit Book
+    const editBookForm = document.getElementById('editBookForm');
+    if (editBookForm) {
+        editBookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bookId = parseInt(document.getElementById('editBookId').value);
+            const price = parseFloat(document.getElementById('editBookPrice').value);
+            const stock = parseInt(document.getElementById('editBookStock').value);
+
+            try {
+                const res = await fetch('api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_book',
+                        bookid: bookId,
+                        price: price,
+                        stockQuantity: stock
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminAlert('Book updated!');
+                    editModal.classList.add('hidden');
+                    loadInventory();
+                    loadStats();
+                } else {
+                    alert(data.message || 'Update failed.');
+                }
+            } catch (err) {
+                alert('An error occurred.');
+            }
+        });
+    }
+
+    // Submit Add Author
+    const addAuthorForm = document.getElementById('addAuthorForm');
+    if (addAuthorForm) {
+        addAuthorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('newAuthorName').value.trim();
+            const bio = document.getElementById('newAuthorBio').value.trim();
+            if (!name) return;
+
+            try {
+                const res = await fetch('api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add_author', name: name, biography: bio })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminAlert('Author added!');
+                    addAuthorForm.reset();
+                    loadTaxonomies();
+                } else {
+                    alert(data.message || 'Failed to add author.');
+                }
+            } catch (err) {
+                alert('An error occurred.');
+            }
+        });
+    }
+
+    // Submit Add Genre
+    const addGenreForm = document.getElementById('addGenreForm');
+    if (addGenreForm) {
+        addGenreForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('newGenreName').value.trim();
+            if (!name) return;
+
+            try {
+                const res = await fetch('api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add_genre', genreName: name })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAdminAlert('Genre added!');
+                    addGenreForm.reset();
+                    loadTaxonomies();
+                } else {
+                    alert(data.message || 'Failed to add genre.');
+                }
+            } catch (err) {
+                alert('An error occurred.');
+            }
+        });
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function escapeJs(str) {
+    if (!str) return '';
+    return String(str).replace(/'/g, "\\'");
+}
