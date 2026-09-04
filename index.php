@@ -19,4 +19,23 @@ startSecureSession();
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    
+
+    <!-- ======================== SIMPLE NAVIGATION BAR ======================== -->
+        <header class="site-header">
+            <div class="container header-inner">
+                <!-- Brand Logo -->
+                <a href="index.php" class="brand-logo">
+                    <span class="brand-icon">📚</span>
+                    <span class="brand-name">BookStore<span class="brand-dot">.</span></span>
+                </a>
+
+                <!-- Search Bar -->
+                <div class="search-wrapper">
+                    <div class="search-input-group">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="siteSearchInput" class="search-input" placeholder="Search by title, author, or ISBN..." autocomplete="off">
+                        <button id="searchClearBtn" class="search-clear-btn" title="Clear search">&times;</button>
+                    </div>
+                </div>
+
+                
