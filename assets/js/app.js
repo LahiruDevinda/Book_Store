@@ -993,3 +993,41 @@ async function handleLoginSubmit(e) {
         showToast('Login request error.', 'error');
     }
 }
+
+async function handleRegisterSubmit(e) {
+    e.preventDefault();
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const lastName = document.getElementById('regLastName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+
+    try {
+        const res = await fetch('auth.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'register', firstName, lastName, email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+            state.user = data.user;
+            renderHeaderUserUI();
+            showToast(data.message);
+            document.getElementById('authModal').classList.add('hidden');
+
+            // Perform synchronization of guest localStorage data
+            await performGuestSync();
+            await refreshCart();
+            await refreshWishlist();
+
+            // Resume checkout if user was checking out
+            if (state.isCheckingOut) {
+                state.isCheckingOut = false;
+                openCheckoutModal();
+            }
+        } else {
+            showToast(data.message || 'Registration failed.', 'error');
+        }
+    } catch (e) {
+        showToast('Registration request error.', 'error');
+    }
+}
