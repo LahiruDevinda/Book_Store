@@ -292,7 +292,33 @@ $adminUser = $_SESSION['user'];
 
   <!-- Edit Book Modal -->
   <div id="editBookModal" class="modal-overlay hidden">
-    <div class="modal-dialog" style="max-width:400px;"></div>
+    <div class="modal-dialog" style="max-width:400px;">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Stock & Price</h3>
+        <button class="modal-close" id="closeEditBookModal">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="editBookForm" class="modal-body">
+        <input type="hidden" id="editBookId">
+        <div class="form-group">
+          <label class="form-label" id="editBookTitleLabel">Title</label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price ($)</label>
+          <input type="number" step="0.01" min="0.01" id="editBookPrice" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Quantity</label>
+          <input type="number" min="0" id="editBookStock" class="form-control" required>
+        </div>
+        <div class="modal-footer" style="padding:0; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" id="cancelEditBookBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
   </div>
 </body>
 
