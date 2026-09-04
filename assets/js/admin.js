@@ -239,3 +239,11 @@ function renderAuthorsList() {
         </div>
     `).join('');
 }
+
+function renderGenresList() {
+    const list = document.getElementById('genresList');
+    if (!list) return;
+    list.innerHTML = cachedGenres.map(g => `
+        <span class="genre-tag">${escapeHtml(g.genreName)}</span>
+    `).join('');
+}
