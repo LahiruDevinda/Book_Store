@@ -154,3 +154,33 @@ if ($action === 'get') {
         'cartId'   => $cartId
     ]);
 }
+
+if ($action === 'add') {
+    $bookId = (int)($input['bookid'] ?? 0);
+    $quantity = max(1, (int)($input['quantity'] ?? 1));
+
+    if ($bookId <= 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Invalid book ID.'], 400);
+    }
+
+    $chkBook = $pdo->prepare("SELECT bookid, stockQuantity FROM Book WHERE bookid = ?");
+    $chkBook->execute([$bookId]);
+    $book = $chkBook->fetch();
+
+    if (!$book) {
+        sendJsonResponse(['success' => false, 'message' => 'Book not found.'], 404);
+    }
+
+    if ((int)$book['stockQuantity'] < 1) {
+        sendJsonResponse(['success' => false, 'message' => 'This book is currently out of stock.'], 400);
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO Cart_Item (cartid, bookid, quantity)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+    ");
+    $stmt->execute([$cartId, $bookId, $quantity]);
+
+    sendJsonResponse(['success' => true, 'message' => 'Added to cart!']);
+}
