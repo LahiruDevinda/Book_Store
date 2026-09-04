@@ -214,25 +214,25 @@ $adminUser = $_SESSION['user'];
       <div class="two-col-grid">
         <!-- Authors Card -->
         <div class="card p-4">
-          <h3>Authors</h3>
-          <form id="addAuthorForm">
+          <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">Authors</h3>
+          <form id="addAuthorForm" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
             <input type="text" id="newAuthorName" placeholder="Author Full Name" class="form-control" required>
             <textarea id="newAuthorBio" placeholder="Short Biography" class="form-control" rows="2"></textarea>
-            <button type="submit" class="btn btn-primary btn-sm">+ Add Author</button>
+            <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-start;">+ Add Author</button>
           </form>
-          <div id="authorsList">
+          <div id="authorsList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
             <!-- Injected via JS -->
           </div>
         </div>
 
         <!-- Genres Card -->
         <div class="card p-4">
-          <h3">Genres</h3>
-          <form id="addGenreForm">
+          <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">Genres</h3>
+          <form id="addGenreForm" style="display:flex; gap:10px; margin-bottom:20px;">
             <input type="text" id="newGenreName" placeholder="New Genre Name" class="form-control" required>
             <button type="submit" class="btn btn-primary btn-sm">+ Add Genre</button>
           </form>
-          <div id="genresList">
+          <div id="genresList" style="max-height:300px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:8px;">
             <!-- Injected via JS -->
           </div>
         </div>
