@@ -55,3 +55,24 @@ CREATE TABLE IF NOT EXISTS PromoCode (
     exp_date DATE NOT NULL,
     FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Orders (
+    orderid INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NOT NULL,
+    addressid INT NOT NULL,
+    promoCodeld INT NULL,
+    subTotal DECIMAL(10,2) NOT NULL,
+    orderStatus VARCHAR(50) DEFAULT 'Pending',
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userid) REFERENCES Users(userid),
+    FOREIGN KEY (addressid) REFERENCES AddressBook(addressid),
+    FOREIGN KEY (promoCodeld) REFERENCES PromoCode(promoCodeld)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Payment (
+    paymentId INT AUTO_INCREMENT PRIMARY KEY,
+    orderid INT UNIQUE NOT NULL,
+    method ENUM('COD', 'card') NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    FOREIGN KEY (orderid) REFERENCES Orders(orderid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
