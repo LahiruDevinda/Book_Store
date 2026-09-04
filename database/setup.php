@@ -55,3 +55,26 @@ try {
     } else {
         $userId = $user['userid'];
     }
+
+    $authors = [
+        ['Robert C. Martin', 'Uncle Bob is an author of renowned software craftsmanship books.'],
+        ['George Orwell', 'Eric Arthur Blair was an English novelist and essayist.'],
+        ['Frank Herbert', 'American science-fiction author best known for Dune.'],
+        ['F. Scott Fitzgerald', 'American novelist of the Jazz Age.'],
+        ['Yuval Noah Harari', 'Historian, philosopher and author of Sapiens.'],
+        ['Martin Fowler', 'Author and international speaker on software architecture.']
+    ];
+
+    $authorMap = [];
+    $stmtAuthor = $pdo->prepare("INSERT INTO Author (name, biography) VALUES (?, ?)");
+    foreach ($authors as $a) {
+        $chk = $pdo->prepare("SELECT authorid FROM Author WHERE name = ?");
+        $chk->execute([$a[0]]);
+        $row = $chk->fetch();
+        if ($row) {
+            $authorMap[$a[0]] = $row['authorid'];
+        } else {
+            $stmtAuthor->execute([$a[0], $a[1]]);
+            $authorMap[$a[0]] = $pdo->lastInsertId();
+        }
+    }
