@@ -155,3 +155,12 @@ $stmtReview = $pdo->prepare("INSERT INTO Review (userid, bookid, rate, review) V
 $stmtReview->execute([$testUserId, $bid1]);
 $reviewId = (int)$pdo->lastInsertId();
 assertCondition($reviewId > 0, "Review successfully created with 5-star rating");
+
+$invalidRateThrew = false;
+try {
+    $pdo->prepare("INSERT INTO Review (userid, bookid, rate, review) VALUES (?, ?, 7, 'Invalid rating')")
+        ->execute([$testUserId, $bid1]);
+} catch (Exception $e) {
+    $invalidRateThrew = true;
+}
+assertCondition($invalidRateThrew, "Rate CHECK constraint enforced (rate > 5 rejected by database)");
