@@ -271,3 +271,55 @@ startSecureSession();
                 </div>
             </div>
         </div>
+
+            <!-- ======================== BOOK DETAILS MODAL ======================== -->
+        <div class="modal-overlay hidden" id="bookDetailsModal">
+            <div class="modal-dialog" style="max-width:640px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Book Details</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body" id="bookDetailsContent">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav">
+            <a href="index.php" class="mobile-nav-btn active">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+            <button class="mobile-nav-btn" id="mobSearchBtn">
+                <span class="mobile-nav-icon">🔍</span>
+                <span>Search</span>
+            </button>
+            <button class="mobile-nav-btn" onclick="document.getElementById('wishlistTrigger')?.click()">
+                <span class="mobile-nav-icon">🤍</span>
+                <span>Wishlist</span>
+            </button>
+            <button class="mobile-nav-btn" onclick="document.getElementById('cartTrigger')?.click()">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Cart</span>
+            </button>
+        </nav>
+
+        <!-- Toast Notifications Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Clean Minimal Footer -->
+        <footer class="site-footer">
+            <div class="container footer-inner">
+                <div class="footer-brand">
+                    <span>📚 BookStore.</span>
+                </div>
+                <div class="footer-copy">
+                    &copy; <?= date('Y'); ?> BookStore. All rights reserved.
+                </div>
+            </div>
+        </footer>
+
+        <script src="assets/js/app.js"></script>
+    </body>
+    </html>
