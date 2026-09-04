@@ -200,4 +200,7 @@ try {
 
     echo "=== Database setup completed successfully! ===\n";
 
+} catch (Exception $e) {
+    echo "ERROR: " . $e->getMessage() . "\n";
+    exit(1);
 }
