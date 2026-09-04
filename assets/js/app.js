@@ -136,3 +136,33 @@ async function handleLogout() {
         console.error('Logout error', e);
     }
 }
+
+// "The Merge" - Sync local storage to database after authentication
+async function performGuestSync() {
+    loadLocalGuestData();
+    if (state.guestCart.length === 0 && state.guestWishlist.length === 0) {
+        return;
+    }
+
+    try {
+        const res = await fetch('api/sync_local.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                guest_cart: state.guestCart,
+                guest_wishlist: state.guestWishlist
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            localStorage.removeItem('guest_cart');
+            localStorage.removeItem('guest_wishlist');
+            state.guestCart = [];
+            state.guestWishlist = [];
+            showToast('Your saved items have been synchronized.');
+        }
+    } catch (e) {
+        console.error('Sync failed', e);
+    }
+}
+
