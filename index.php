@@ -80,3 +80,27 @@ startSecureSession();
                 </div>
             </div>
         </nav>
+
+            <!-- ======================== CATALOG SECTION ======================== -->
+        <main class="container catalog-section">
+            <div class="catalog-toolbar">
+                <div class="results-count" id="resultsCount">
+                    Loading catalog...
+                </div>
+                <div class="toolbar-controls">
+                    <label style="font-size:13px; color:var(--text-muted);">Sort by:</label>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="featured">Featured</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="rating">Top Rated</option>
+                        <option value="title">Title: A to Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Books Grid Container -->
+            <div class="book-grid" id="bookGrid">
+                <!-- Books dynamically injected by assets/js/app.js -->
+            </div>
+        </main>
