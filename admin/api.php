@@ -138,3 +138,29 @@ if ($action === 'update_book') {
 
     sendJsonResponse(['success' => true, 'message' => 'Book updated successfully.']);
 }
+
+// ======================== DELETE BOOK ========================
+if ($action === 'delete_book') {
+    $bookId = (int)($input['bookid'] ?? 0);
+    if ($bookId <= 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Invalid book ID.'], 400);
+    }
+
+    try {
+        $pdo->beginTransaction();
+        $pdo->prepare("DELETE FROM Book_Author WHERE bookid = ?")->execute([$bookId]);
+        $pdo->prepare("DELETE FROM Book_Genre WHERE bookid = ?")->execute([$bookId]);
+        $pdo->prepare("DELETE FROM Cart_Item WHERE bookid = ?")->execute([$bookId]);
+        $pdo->prepare("DELETE FROM Wishlist WHERE bookid = ?")->execute([$bookId]);
+        $pdo->prepare("DELETE FROM Review WHERE bookid = ?")->execute([$bookId]);
+        $pdo->prepare("DELETE FROM Book WHERE bookid = ?")->execute([$bookId]);
+        $pdo->commit();
+
+        sendJsonResponse(['success' => true, 'message' => 'Book deleted successfully.']);
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        sendJsonResponse(['success' => false, 'message' => 'Failed to delete book: ' . $e->getMessage()], 500);
+    }
+}
