@@ -137,3 +137,58 @@ startSecureSession();
                 </div>
             </div>
         </div>
+
+            <!-- ======================== AUTH MODAL ======================== -->
+        <div class="modal-overlay hidden" id="authModal">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h3 class="modal-title">Welcome to BookStore</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Checkout Notice Prompt -->
+                    <div id="authNotice" class="alert-box alert-success" style="display:none; margin-bottom:16px;"></div>
+
+                    <div class="modal-tabs">
+                        <button class="modal-tab-btn active" id="loginTabBtn">Sign In</button>
+                        <button class="modal-tab-btn" id="registerTabBtn">Create Account</button>
+                    </div>
+
+                    <!-- Sign In Form -->
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" id="loginEmail" class="form-control" required placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Sign In</button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" style="display:none;">
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" id="regFirstName" class="form-control" required placeholder="Jane">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" id="regLastName" class="form-control" required placeholder="Doe">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" id="regEmail" class="form-control" required placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password (Min 6 characters)</label>
+                            <input type="password" id="regPassword" class="form-control" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
