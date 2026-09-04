@@ -69,3 +69,48 @@ async function loadStats() {
     console.error('Error loading stats', e);
   }
 }
+
+// Load and display the inventory of books in the admin dashboard
+let cachedBooks = [];
+async function loadInventory() {
+    const tbody = document.getElementById('inventoryTableBody');
+    try {
+        const res = await fetch('api.php?action=get_books');
+        const data = await res.json();
+        if (data.success && data.books) {
+            cachedBooks = data.books;
+            if (cachedBooks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No books in catalog yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = cachedBooks.map(b => `
+                <tr>
+                    <td style="width:60px;">
+                        <img src="${b.coverImageUrl || 'https://via.placeholder.com/60x80'}" alt="${b.title}" class="table-cover-thumb">
+                    </td>
+                    <td>
+                        <div style="font-weight:600; color:var(--text-main);">${escapeHtml(b.title)}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">ISBN: ${escapeHtml(b.ISBN)}</div>
+                    </td>
+                    <td style="font-size:13px; color:var(--text-muted);">${escapeHtml(b.authors || 'None')}</td>
+                    <td style="font-size:13px; color:var(--text-muted);">${escapeHtml(b.genres || 'None')}</td>
+                    <td style="font-weight:600;">$${Number(b.price).toFixed(2)}</td>
+                    <td>
+                        <span class="badge ${b.stockQuantity < 10 ? 'badge-warning' : 'badge-neutral'}">
+                            ${b.stockQuantity} in stock
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-secondary btn-sm" onclick="openEditModal(${b.bookid})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteBook(${b.bookid}, '${escapeJs(b.title)}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Failed to load inventory.</td></tr>';
+    }
+}
