@@ -92,3 +92,13 @@ $stmtSyncWish->execute([$testUserId, $bid1]);
 $cartCountAfter = (int)$pdo->query("SELECT COUNT(*) FROM Cart_Item WHERE cartid = $testCartId")->fetchColumn();
 assertCondition($cartCountAfter === 2, "INSERT IGNORE safely handled duplicate merge without error or duplicates");
 
+echo "\n--- Group 4: Checkout Flow & Historical Price Locking ---\n";
+
+$pdo->prepare("INSERT INTO AddressBook (userid, no, street, zipCode) VALUES (?, '99A', 'Test St', '12345')")
+    ->execute([$testUserId]);
+$testAddrId = (int)$pdo->lastInsertId();
+
+$testPromoCode = 'TESTPROMO_' . time();
+$pdo->prepare("INSERT INTO PromoCode (userid, code, type, price, isValid, exp_date) VALUES (?, ?, 'percentage', 10.00, 1, DATE_ADD(CURDATE(), INTERVAL 5 DAY))")
+    ->execute([$testUserId, $testPromoCode]);
+$testPromoId = (int)$pdo->lastInsertId();
