@@ -32,3 +32,7 @@ if (!isset($_SESSION['user']['userid']) || empty($_SESSION['user']['isAdmin'])) 
 <?php
   exit;
 }
+
+// If the user is an admin, retrieve their information
+$adminUser = $_SESSION['user'];
+?>
