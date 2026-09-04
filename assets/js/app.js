@@ -73,3 +73,49 @@ async function checkAuthStatus() {
         console.error('Failed to check auth status', e);
     }
 }
+
+function renderHeaderUserUI() {
+    const authActionArea = document.getElementById('authActionArea');
+    if (!authActionArea) return;
+
+    if (state.user) {
+        const initials = (state.user.firstName.charAt(0) + state.user.lastName.charAt(0)).toUpperCase();
+        authActionArea.innerHTML = `
+            <div class="user-menu-container">
+                <button class="user-profile-btn" id="userMenuTrigger">
+                    <span class="user-avatar">${initials}</span>
+                    <span>${escapeHtml(state.user.firstName)}</span>
+                    <span style="font-size:10px;">▼</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-name">${escapeHtml(state.user.firstName + ' ' + state.user.lastName)}</div>
+                        <div class="dropdown-user-email">${escapeHtml(state.user.email)}</div>
+                    </div>
+                    ${state.user.isAdmin ? `<a href="admin/dashboard.php" class="dropdown-item">⚙️ Admin Control</a>` : ''}
+                    <button class="dropdown-item" id="navLogoutBtn">🚪 Sign Out</button>
+                </div>
+            </div>
+        `;
+
+        const trigger = document.getElementById('userMenuTrigger');
+        const dropdown = document.getElementById('userDropdown');
+        if (trigger && dropdown) {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', () => dropdown.classList.remove('show'));
+        }
+
+        const logoutBtn = document.getElementById('navLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+    } else {
+        authActionArea.innerHTML = `
+            <button class="btn btn-secondary btn-sm" id="openAuthModalBtn">Sign In</button>
+        `;
+        document.getElementById('openAuthModalBtn').addEventListener('click', () => openAuthModal('login'));
+    }
+}
