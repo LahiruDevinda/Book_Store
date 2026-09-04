@@ -170,6 +170,73 @@ if ($action === 'place_order') {
         }
 
         $finalTotal = max(0.00, round($subTotal - $discountAmount, 2));
+        
+        $stmtOrder = $pdo->prepare("
+            INSERT INTO Orders (userid, addressid, promoCodeld, subTotal, orderStatus)
+            VALUES (?, ?, ?, ?, 'Completed')
+        ");
+        $stmtOrder->execute([$userId, $addressId, $promoId, $finalTotal]);
+        $orderId = (int)$pdo->lastInsertId();
 
-    } catch (Exception $e) {}
-}    
+        $stmtOrderItem = $pdo->prepare("
+            INSERT INTO Order_Item (orderid, bookid, unitPrice, quantity)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmtDeductStock = $pdo->prepare("
+            UPDATE Book SET stockQuantity = stockQuantity - ? WHERE bookid = ?
+        ");
+
+        $lockedItems = [];
+        foreach ($items as $item) {
+            $bookId = (int)$item['bookid'];
+            $qty = (int)$item['quantity'];
+            $unitPrice = (float)$item['price'];
+
+            $stmtOrderItem->execute([$orderId, $bookId, $unitPrice, $qty]);
+            $stmtDeductStock->execute([$qty, $bookId]);
+
+            $lockedItems[] = [
+                'bookid'    => $bookId,
+                'title'     => $item['title'],
+                'unitPrice' => $unitPrice,
+                'quantity'  => $qty,
+                'itemTotal' => round($unitPrice * $qty, 2)
+            ];
+        }
+
+        $paymentEnum = ($paymentMethod === 'CARD') ? 'card' : 'COD';
+        $stmtPayment = $pdo->prepare("
+            INSERT INTO Payment (orderid, method, status)
+            VALUES (?, ?, 'Completed')
+        ");
+        $stmtPayment->execute([$orderId, $paymentEnum]);
+        $paymentId = (int)$pdo->lastInsertId();
+
+        $stmtClearCart = $pdo->prepare("DELETE FROM Cart_Item WHERE cartid = ?");
+        $stmtClearCart->execute([$cartId]);
+
+        $pdo->commit();
+
+        sendJsonResponse([
+            'success'        => true,
+            'message'        => 'Order placed successfully!',
+            'orderId'        => $orderId,
+            'paymentId'      => $paymentId,
+            'subTotal'       => $subTotal,
+            'discountAmount' => $discountAmount,
+            'finalTotal'     => $finalTotal,
+            'items'          => $lockedItems,
+            'paymentMethod'  => $paymentEnum,
+            'orderStatus'    => 'Completed'
+        ]);
+
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Checkout error: " . $e->getMessage());
+        sendJsonResponse(['success' => false, 'message' => 'Checkout failed: ' . $e->getMessage()], 500);
+    }
+}
+
+sendJsonResponse(['success' => false, 'message' => 'Unknown action.'], 400);
