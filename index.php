@@ -64,3 +64,42 @@ if ($action === 'detail' || isset($_GET['id'])) {
 
     sendJsonResponse(['success' => true, 'book' => $book]);
 }
+
+// ======================== LIST BOOKS WITH SEARCH & FILTERS ========================
+$search = trim($_GET['search'] ?? '');
+$genreId = (int)($_GET['genre'] ?? 0);
+$sort = $_GET['sort'] ?? 'featured';
+
+$sql = "
+    SELECT b.bookid, b.title, b.ISBN, b.price, b.stockQuantity, b.coverImageUrl,
+           GROUP_CONCAT(DISTINCT a.name ORDER BY a.name SEPARATOR ', ') AS authors,
+           GROUP_CONCAT(DISTINCT g.genreName ORDER BY g.genreName SEPARATOR ', ') AS genres,
+           COALESCE(AVG(r.rate), 0) AS avgRating,
+           COUNT(DISTINCT r.reviewld) AS reviewCount
+    FROM Book b
+    LEFT JOIN Book_Author ba ON b.bookid = ba.bookid
+    LEFT JOIN Author a ON ba.authorid = a.authorid
+    LEFT JOIN Book_Genre bg ON b.bookid = bg.bookid
+    LEFT JOIN Genre g ON bg.genreid = g.genreid
+    LEFT JOIN Review r ON b.bookid = r.bookid
+";
+
+$where = [];
+$params = [];
+
+if (!empty($search)) {
+    $where[] = "(b.title LIKE ? OR b.ISBN LIKE ? OR a.name LIKE ?)";
+    $like = '%' . $search . '%';
+    $params[] = $like;
+    $params[] = $like;
+    $params[] = $like;
+}
+
+if ($genreId > 0) {
+    $where[] = "b.bookid IN (SELECT bookid FROM Book_Genre WHERE genreid = ?)";
+    $params[] = $genreId;
+}
+
+if (!empty($where)) {
+    $sql .= " WHERE " . implode(" AND ", $where);
+}
