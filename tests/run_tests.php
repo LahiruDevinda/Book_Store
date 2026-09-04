@@ -73,3 +73,16 @@ $testCartId = (int)$pdo->lastInsertId();
 $bookIds = $pdo->query("SELECT bookid FROM Book LIMIT 2")->fetchAll(PDO::FETCH_COLUMN);
 $bid1 = (int)$bookIds[0];
 $bid2 = (int)$bookIds[1];
+
+$stmtSyncCart = $pdo->prepare("INSERT IGNORE INTO Cart_Item (cartid, bookid, quantity) VALUES (?, ?, ?)");
+$stmtSyncCart->execute([$testCartId, $bid1, 2]);
+$stmtSyncCart->execute([$testCartId, $bid2, 1]);
+
+$stmtSyncWish = $pdo->prepare("INSERT IGNORE INTO Wishlist (userid, bookid) VALUES (?, ?)");
+$stmtSyncWish->execute([$testUserId, $bid1]);
+
+$cartCount = (int)$pdo->query("SELECT COUNT(*) FROM Cart_Item WHERE cartid = $testCartId")->fetchColumn();
+$wishCount = (int)$pdo->query("SELECT COUNT(*) FROM Wishlist WHERE userid = $testUserId")->fetchColumn();
+
+assertCondition($cartCount === 2, "Cart_Item populated with merged items");
+assertCondition($wishCount === 1, "Wishlist populated with merged item");
