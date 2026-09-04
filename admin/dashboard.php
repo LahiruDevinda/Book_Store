@@ -60,12 +60,32 @@ $adminUser = $_SESSION['user'];
   <!-- Admin navigation -->
   <header class="admin-header">
     <div class="header-inner container">
+
+      <!-- Brand Area -->
       <div class="brand-area">
         <a href="dashboard.php" class="brand-logo">
           <span class="brand-icon">📚</span>
           <span class="brand-name">BookStore<span class="brand-dot">.</span></span>
           <span class="admin-badge">Admin</span>
         </a>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="admin-nav-tabs">
+        <button class="admin-tab active" data-tab="overview">Overview</button>
+        <button class="admin-tab" data-tab="inventory">Inventory</button>
+        <button class="admin-tab" data-tab="orders">Orders Audit</button>
+        <button class="admin-tab" data-tab="taxonomies">Authors & Genres</button>
+      </div>
+
+      <!-- User Menu -->
+      <div class="admin-user-menu">
+        <!-- User Profile -->
+        <span class="admin-username">
+          <?= htmlspecialchars($adminUser['firstName'] . ' ' . $adminUser['lastName']); ?>
+        </span>
+        <a href="../index.php" class="btn btn-secondary btn-sm">Storefront</a>
+        <button id="adminLogoutBtn" class="btn btn-secondary btn-sm">Sign Out</button>
       </div>
     </div>
   </header>
