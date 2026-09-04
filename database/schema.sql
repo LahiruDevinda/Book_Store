@@ -87,3 +87,19 @@ CREATE TABLE IF NOT EXISTS Review (
     FOREIGN KEY (userid) REFERENCES Users(userid),
     FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Book_Author (
+    bookid INT,
+    authorid INT,
+    PRIMARY KEY (bookid, authorid),
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE,
+    FOREIGN KEY (authorid) REFERENCES Author(authorid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS Book_Genre (
+    bookid INT,
+    genreid INT,
+    PRIMARY KEY (bookid, genreid),
+    FOREIGN KEY (bookid) REFERENCES Book(bookid) ON DELETE CASCADE,
+    FOREIGN KEY (genreid) REFERENCES Genre(genreid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
