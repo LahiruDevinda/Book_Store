@@ -55,6 +55,25 @@ try {
         }
     }
 
+    $stmtCartItem = $pdo->prepare("INSERT IGNORE INTO Cart_Item (cartid, bookid, quantity) VALUES (?, ?, ?)");
+    if (is_array($guestCart)) {
+        foreach ($guestCart as $item) {
+            $bookId = (int)($item['bookid'] ?? 0);
+            $quantity = max(1, (int)($item['quantity'] ?? 1));
+
+            if ($bookId > 0) {
+                $chkBook = $pdo->prepare("SELECT bookid FROM Book WHERE bookid = ?");
+                $chkBook->execute([$bookId]);
+                if ($chkBook->fetch()) {
+                    $stmtCartItem->execute([$cartId, $bookId, $quantity]);
+                    if ($stmtCartItem->rowCount() > 0) {
+                        $mergedCartCount++;
+                    }
+                }
+            }
+        }
+    }
+
 } catch (Exception $e) {
 
 }
