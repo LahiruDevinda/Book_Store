@@ -85,6 +85,15 @@ try {
     $totalWishlistItems = (int)$wishlistCountStmt->fetchColumn();
 
 
+    sendJsonResponse([
+        'success' => true,
+        'message' => 'Items merged successfully.',
+        'mergedCartItems' => $mergedCartCount,
+        'mergedWishlistItems' => $mergedWishlistCount,
+        'cartCount' => $totalCartItems,
+        'wishlistCount' => $totalWishlistItems
+    ]);
+
 } catch (Exception $e) {
 
 }
