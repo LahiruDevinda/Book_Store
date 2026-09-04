@@ -33,3 +33,27 @@ if ($action === 'stats') {
         ]
     ]);
 }
+
+// ======================== GET ALL BOOKS WITH BRIDGES ========================
+if ($action === 'get_books') {
+    $stmt = $pdo->query("
+        SELECT b.bookid, b.title, b.ISBN, b.price, b.stockQuantity, b.coverImageUrl,
+               GROUP_CONCAT(DISTINCT a.name SEPARATOR ', ') AS authors,
+               GROUP_CONCAT(DISTINCT g.genreName SEPARATOR ', ') AS genres
+        FROM Book b
+        LEFT JOIN Book_Author ba ON b.bookid = ba.bookid
+        LEFT JOIN Author a ON ba.authorid = a.authorid
+        LEFT JOIN Book_Genre bg ON b.bookid = bg.bookid
+        LEFT JOIN Genre g ON bg.genreid = g.genreid
+        GROUP BY b.bookid
+        ORDER BY b.bookid DESC
+    ");
+    $books = $stmt->fetchAll();
+
+    foreach ($books as &$book) {
+        $book['price'] = (float)$book['price'];
+        $book['stockQuantity'] = (int)$book['stockQuantity'];
+    }
+
+    sendJsonResponse(['success' => true, 'books' => $books]);
+}
