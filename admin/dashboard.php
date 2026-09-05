@@ -76,6 +76,7 @@ $adminUser = $_SESSION['user'];
         <button class="admin-tab" data-tab="inventory">Inventory</button>
         <button class="admin-tab" data-tab="orders">Orders Audit</button>
         <button class="admin-tab" data-tab="taxonomies">Authors & Genres</button>
+        <button class="admin-tab" data-tab="promos">Promo Codes</button>
       </div>
 
       <!-- User Menu -->
@@ -236,6 +237,55 @@ $adminUser = $_SESSION['user'];
             <!-- Injected via JS -->
           </div>
         </div>
+      </div>
+    </section>
+
+        <!-- ==================== PROMO CODES MANAGEMENT TAB ==================== -->
+    <section id="tab-promos" class="admin-panel">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Promo Code Management</h1>
+          <p class="panel-subtitle">Create and assign discount coupons directly to registered users.</p>
+        </div>
+      </div>
+
+      <div class="card p-4" style="max-width: 600px;">
+        <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">Assign New Promo Code</h3>
+        <form id="assignPromoForm" style="display:flex; flex-direction:column; gap:14px;">
+          
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Select User *</label>
+            <select id="promoUserId" class="form-control" required>
+              <option value="">Loading users...</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Promo Code String *</label>
+            <input type="text" id="promoCodeString" class="form-control" placeholder="e.g. SUMMER2026" style="text-transform:uppercase;" required>
+          </div>
+
+          <div class="form-group-row" style="margin-bottom:0;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Discount Type *</label>
+              <select id="promoType" class="form-control">
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount ($)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Discount Value *</label>
+              <input type="number" step="0.01" min="0.01" id="promoValue" class="form-control" placeholder="15" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Expiration Date *</label>
+            <input type="date" id="promoExpDate" class="form-control" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="align-self:flex-start; margin-top:6px;">Assign Promo Code</button>
+        </form>
       </div>
     </section>
   </main>
