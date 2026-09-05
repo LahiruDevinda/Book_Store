@@ -9,6 +9,8 @@ function initAdmin() {
   loadStats();
   loadInventory();
   loadOrders();
+  loadUsersForPromoDropdown();
+  setupPromoForm();
   loadTaxonomies();
   setupForms();
 
@@ -421,6 +423,61 @@ function setupForms() {
       }
     });
   }
+}
+
+async function loadUsersForPromoDropdown() {
+  const select = document.getElementById('promoUserId');
+  if (!select) return;
+
+  try {
+    const res = await fetch('../api/promos.php?action=get_users');
+    const data = await res.json();
+    if (data.success && data.users) {
+      select.innerHTML = '<option value="">-- Choose a Customer --</option>' + 
+        data.users.map(u => `<option value="${u.userid}">${escapeHtml(u.firstName + ' ' + u.lastName)} (${escapeHtml(u.email)})</option>`).join('');
+    } else {
+      select.innerHTML = '<option value="">Failed to load users</option>';
+    }
+  } catch (e) {
+    select.innerHTML = '<option value="">Error loading users</option>';
+  }
+}
+
+function setupPromoForm() {
+  const form = document.getElementById('assignPromoForm');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      action: 'assign_promo',
+      userid: parseInt(document.getElementById('promoUserId').value),
+      code: document.getElementById('promoCodeString').value.trim(),
+      type: document.getElementById('promoType').value,
+      price: parseFloat(document.getElementById('promoValue').value),
+      exp_date: document.getElementById('promoExpDate').value
+    };
+
+    try {
+      const res = await fetch('../api/promos.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showAdminAlert(data.message, 'success');
+        form.reset();
+        loadUsersForPromoDropdown();
+      } else {
+        alert(data.message || 'Failed to assign promo code.');
+      }
+    } catch (err) {
+      alert('An error occurred while communicating with the server.');
+    }
+  });
 }
 
 function escapeHtml(str) {
