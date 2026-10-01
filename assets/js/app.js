@@ -80,6 +80,8 @@ function renderHeaderUserUI() {
 
     if (state.user) {
         const initials = (state.user.firstName.charAt(0) + state.user.lastName.charAt(0)).toUpperCase();
+        const isShopkeeper = state.user.role === 'shopkeeper';
+
         authActionArea.innerHTML = `
             <div class="user-menu-container">
                 <button class="user-profile-btn" id="userMenuTrigger">
@@ -93,8 +95,9 @@ function renderHeaderUserUI() {
                         <div class="dropdown-user-email">${escapeHtml(state.user.email)}</div>
                     </div>
                     <a href="profile.php" class="dropdown-item">My Account</a>
-                    ${state.user.isAdmin ? `<a href="admin/dashboard.php" class="dropdown-item">Admin Panel</a>` : ''}
-                    <button class="dropdown-item" id="navLogoutBtn">Sign Out</button>
+                    ${state.user.isAdmin ? `<a href="admin/dashboard.php" class="dropdown-item">Admin Control</a>` : ''}
+                    ${isShopkeeper ? `<a href="shopkeeper/dashboard.php" class="dropdown-item">Shopkeeper Dashboard</a>` : ''}
+                    <button class="dropdown-item" id="navLogoutBtn">🚪 Sign Out</button>
                 </div>
             </div>
         `;
@@ -725,7 +728,7 @@ async function applyPromoCode() {
 async function placeOrder() {
     const btn = document.getElementById('placeOrderBtn');
     if (btn) btn.disabled = true;
-
+    
     let payload = {
         action: 'place_order',
         promoCode: state.appliedPromo ? state.appliedPromo.code : '',
@@ -738,13 +741,14 @@ async function placeOrder() {
         const no = document.getElementById('addrNo')?.value.trim();
         const street = document.getElementById('addrStreet')?.value.trim();
         const zipCode = document.getElementById('addrZip')?.value.trim();
+        const saveAddress = document.getElementById('saveNewAddressCheckbox')?.checked || false;
 
         if (!no || !street || !zipCode) {
             showToast('Please provide your delivery address.', 'error');
             if (btn) btn.disabled = false;
             return;
         }
-        payload.newAddress = { no, street, zipCode };
+        payload.newAddress = { no, street, zipCode, saveAddress };
     }
 
     try {
