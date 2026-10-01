@@ -16,7 +16,8 @@ $pdo = getDBConnection();
 
 $rawInput = file_get_contents('php://input');
 $input = json_decode($rawInput, true) ?: $_POST;
-$action = $input['action'] ?? 'place_order';
+
+$action = $input['action'] ?? ($_GET['action'] ?? 'place_order');
 
 if ($action === 'validate_promo') {
     $code = trim($input['code'] ?? '');
@@ -78,15 +79,22 @@ if ($action === 'place_order') {
             $no = trim($newAddress['no'] ?? '');
             $street = trim($newAddress['street'] ?? '');
             $zipCode = trim($newAddress['zipCode'] ?? '');
+            $saveAddress = !empty($newAddress['saveAddress']);
 
             if (empty($no) || empty($street) || empty($zipCode)) {
                 $pdo->rollBack();
                 sendJsonResponse(['success' => false, 'message' => 'Please provide complete address details.'], 400);
             }
 
-            $stmtInsAddr = $pdo->prepare("INSERT INTO AddressBook (userid, no, street, zipCode) VALUES (?, ?, ?, ?)");
-            $stmtInsAddr->execute([$userId, $no, $street, $zipCode]);
-            $addressId = (int)$pdo->lastInsertId();
+            if ($saveAddress) {
+                $stmtInsAddr = $pdo->prepare("INSERT INTO AddressBook (userid, no, street, zipCode) VALUES (?, ?, ?, ?)");
+                $stmtInsAddr->execute([$userId, $no, $street, $zipCode]);
+                $addressId = (int)$pdo->lastInsertId();
+            } else {
+                $stmtInsAddr = $pdo->prepare("INSERT INTO AddressBook (userid, no, street, zipCode) VALUES (?, ?, ?, ?)");
+                $stmtInsAddr->execute([$userId, $no, $street, $zipCode]);
+                $addressId = (int)$pdo->lastInsertId();
+            }
         } else {
             $stmtDefaultAddr = $pdo->prepare("SELECT addressid FROM AddressBook WHERE userid = ? ORDER BY addressid DESC LIMIT 1");
             $stmtDefaultAddr->execute([$userId]);
@@ -237,6 +245,50 @@ if ($action === 'place_order') {
         error_log("Checkout error: " . $e->getMessage());
         sendJsonResponse(['success' => false, 'message' => 'Checkout failed: ' . $e->getMessage()], 500);
     }
+}
+
+// ======================== GET USER ORDERS ========================
+if ($action === 'get_user_orders') {
+    $stmt = $pdo->prepare("
+        SELECT o.orderid, o.subTotal, o.orderStatus, o.deliveryStatus, o.isDeliveredConfirmed, o.date AS orderDate,
+               ab.no, ab.street, ab.zipCode,
+               pay.method AS paymentMethod
+        FROM Orders o
+        LEFT JOIN AddressBook ab ON o.addressid = ab.addressid
+        LEFT JOIN Payment pay ON o.orderid = pay.orderid
+        WHERE o.userid = ?
+        ORDER BY o.orderid DESC
+    ");
+    $stmt->execute([$userId]);
+    $orders = $stmt->fetchAll();
+
+    foreach ($orders as &$ord) {
+        $ord['subTotal'] = (float)$ord['subTotal'];
+        
+        $stmtItems = $pdo->prepare("
+            SELECT oi.bookid, oi.unitPrice, oi.quantity, b.title
+            FROM Order_Item oi
+            LEFT JOIN Book b ON oi.bookid = b.bookid
+            WHERE oi.orderid = ?
+        ");
+        $stmtItems->execute([$ord['orderid']]);
+        $ord['items'] = $stmtItems->fetchAll();
+    }
+
+    sendJsonResponse(['success' => true, 'orders' => $orders]);
+}
+
+// ======================== CONFIRM DELIVERY ========================
+if ($action === 'confirm_delivery') {
+    $orderId = (int)($input['orderid'] ?? 0);
+    if ($orderId <= 0) {
+        sendJsonResponse(['success' => false, 'message' => 'Invalid order ID.'], 400);
+    }
+
+    $stmt = $pdo->prepare("UPDATE Orders SET isDeliveredConfirmed = 1, deliveryStatus = 'Delivered' WHERE orderid = ? AND userid = ?");
+    $stmt->execute([$orderId, $userId]);
+
+    sendJsonResponse(['success' => true, 'message' => 'Delivery confirmed successfully!']);
 }
 
 sendJsonResponse(['success' => false, 'message' => 'Unknown action.'], 400);
