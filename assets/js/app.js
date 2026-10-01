@@ -92,8 +92,9 @@ function renderHeaderUserUI() {
                         <div class="dropdown-user-name">${escapeHtml(state.user.firstName + ' ' + state.user.lastName)}</div>
                         <div class="dropdown-user-email">${escapeHtml(state.user.email)}</div>
                     </div>
-                    ${state.user.isAdmin ? `<a href="admin/dashboard.php" class="dropdown-item">⚙️ Admin Control</a>` : ''}
-                    <button class="dropdown-item" id="navLogoutBtn">🚪 Sign Out</button>
+                    <a href="profile.php" class="dropdown-item">My Account</a>
+                    ${state.user.isAdmin ? `<a href="admin/dashboard.php" class="dropdown-item">Admin Panel</a>` : ''}
+                    <button class="dropdown-item" id="navLogoutBtn">Sign Out</button>
                 </div>
             </div>
         `;
