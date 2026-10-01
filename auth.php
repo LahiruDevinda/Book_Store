@@ -56,7 +56,8 @@ if ($action === 'login') {
         sendJsonResponse(['success' => false, 'message' => 'Email and password are required.'], 400);
     }
 
-    $stmt = $pdo->prepare("SELECT userid, firstName, lastName, email, password, isAdmin FROM Users WHERE email = ? LIMIT 1");
+    // Fixed: Included 'role' in the SELECT query
+    $stmt = $pdo->prepare("SELECT userid, firstName, lastName, email, password, isAdmin, role FROM Users WHERE email = ? LIMIT 1");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
@@ -64,13 +65,14 @@ if ($action === 'login') {
         sendJsonResponse(['success' => false, 'message' => 'Invalid email address or password.'], 401);
     }
 
-    // Set secure session
+    // Set secure session with role
     $_SESSION['user'] = [
         'userid'    => (int)$user['userid'],
         'firstName' => $user['firstName'],
         'lastName'  => $user['lastName'],
         'email'     => $user['email'],
-        'isAdmin'   => (bool)$user['isAdmin']
+        'isAdmin'   => (bool)$user['isAdmin'],
+        'role'      => $user['role'] ?? 'customer'
     ];
 
     // Ensure user has a Cart record
@@ -187,6 +189,8 @@ if ($action === 'update_profile') {
         'user'    => $_SESSION['user']
     ]);
 }
+
+
 
 // ======================== USER LOGOUT ========================
 if ($action === 'logout') {
