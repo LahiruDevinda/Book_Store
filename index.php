@@ -222,6 +222,13 @@ startSecureSession();
                                 <label class="form-label">Street Address</label>
                                 <input type="text" id="addrStreet" class="form-control" placeholder="123 Main Street">
                             </div>
+                            <!-- Option to save new address -->
+                            <div style="margin-top: 8px;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" id="saveNewAddressCheckbox">
+                                    <span>Save this address to my address book</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
