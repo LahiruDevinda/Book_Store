@@ -443,6 +443,68 @@ async function loadUsersForPromoDropdown() {
   }
 }
 
+async function loadInventoryRequests() {
+  const tbody = document.getElementById('inventoryRequestsTableBody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('api.php?action=get_inventory_requests');
+    const data = await res.json();
+    if (data.success && data.requests) {
+      if (data.requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No pending inventory requests.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.requests.map(r => `
+        <tr>
+          <td>
+            <div style="font-weight:600;">${escapeHtml(r.firstName + ' ' + r.lastName)}</div>
+            <div style="font-size:11px; color:var(--text-muted);">${escapeHtml(r.email)}</div>
+          </td>
+          <td><span class="badge badge-neutral">${r.action_type.toUpperCase()}</span></td>
+          <td>
+            <div style="font-weight:600;">${escapeHtml(r.title)}</div>
+            <div style="font-size:11px; color:var(--text-muted);">ISBN: ${escapeHtml(r.ISBN)}</div>
+          </td>
+          <td style="font-weight:600;">$${Number(r.price).toFixed(2)}</td>
+          <td><span class="badge badge-warning">${r.stockQuantity} units</span></td>
+          <td style="font-size:12px; color:var(--text-muted);">${r.date}</td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-primary btn-sm" onclick="resolveRequest(${r.requestid}, 'approve')">Approve</button>
+              <button class="btn btn-danger btn-sm" onclick="resolveRequest(${r.requestid}, 'reject')">Reject</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Failed to load requests.</td></tr>';
+  }
+}
+
+async function resolveRequest(requestId, decision) {
+  try {
+    const res = await fetch('api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resolve_inventory_request', requestid: requestId, decision })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAdminAlert(data.message, 'success');
+      loadInventoryRequests();
+      loadInventory();
+      loadStats();
+    } else {
+      alert(data.message || 'Operation failed.');
+    }
+  } catch (e) {
+    alert('An error occurred.');
+  }
+}
+
 function setupPromoForm() {
   const form = document.getElementById('assignPromoForm');
   if (!form) return;
