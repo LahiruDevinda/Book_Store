@@ -34,10 +34,10 @@ $user =$_SESSION['user'];
         </div>
     </header>
 
-    <main class="container" style="padding: 40px 20px; max-width: 800px;">
+    <main class="container" style="padding: 40px 20px; max-width: 900px;">
         <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">My Account Dashboard</h1>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
             <!-- Personal Info Form -->
             <div class="card p-4">
                 <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Personal Information</h3>
@@ -70,13 +70,21 @@ $user =$_SESSION['user'];
         </div>
 
         <!-- Addresses Management -->
-        <div class="card p-4" style="margin-top: 24px;">
+        <div class="card p-4" style="margin-bottom: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 style="font-size: 16px; font-weight: 700;">Delivery Addresses</h3>
                 <button class="btn btn-secondary btn-sm" onclick="openAddressModal()">+ Add New Address</button>
             </div>
             <div id="userAddressList" style="display: flex; flex-direction: column; gap: 12px;">
                 <div style="font-size: 13px; color: var(--text-muted);">Loading addresses...</div>
+            </div>
+        </div>
+
+        <!-- Orders & Delivery Tracking -->
+        <div class="card p-4">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">My Orders & Delivery Tracking</h3>
+            <div id="userOrdersList" style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="font-size: 13px; color: var(--text-muted);">Loading orders...</div>
             </div>
         </div>
     </main>
@@ -112,12 +120,24 @@ $user =$_SESSION['user'];
         </div>
     </div>
 
+    <!-- Action Modal (Complaint) -->
+    <div id="actionModal" class="modal-overlay hidden">
+        <div class="modal-dialog" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="actionModalTitle">Action</h3>
+                <button class="modal-close" onclick="closeActionModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="actionModalBody"></div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             loadAddressesList();
             loadUserPromos();
+            loadUserOrders();
 
             document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -198,6 +218,93 @@ $user =$_SESSION['user'];
             }
         }
 
+        async function loadUserOrders() {
+            const container = document.getElementById('userOrdersList');
+            try {
+                const res = await fetch('api/checkout.php?action=get_user_orders');
+                const data = await res.json();
+                if (data.success && data.orders) {
+                    if (data.orders.length === 0) {
+                        container.innerHTML = '<div style="font-size:13px; color:var(--text-muted);">You have not placed any orders yet.</div>';
+                        return;
+                    }
+
+                    container.innerHTML = data.orders.map(o => {
+                        const itemsHtml = (o.items || []).map(it => `
+                            <div style="font-size:12px; color:var(--text-muted);">• ${escapeHtml(it.title)} &times; ${it.quantity}</div>
+                        `).join('');
+
+                        const isDelivered = o.deliveryStatus && o.deliveryStatus.toLowerCase() === 'delivered';
+                        const isConfirmed = Boolean(o.isDeliveredConfirmed);
+
+                        return `
+                            <div style="padding:14px; background:var(--bg-canvas); border:1px solid var(--border-color); border-radius:var(--radius-sm); display:flex; flex-direction:column; gap:8px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong>Order #${o.orderid}</strong>
+                                    <span class="badge ${isDelivered ? 'badge-success' : 'badge-neutral'}">${escapeHtml(o.deliveryStatus || 'Processing')}</span>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-muted);">Date: ${o.orderDate} | Total: <strong>$${Number(o.subTotal).toFixed(2)}</strong></div>
+                                <div style="margin: 4px 0;">${itemsHtml}</div>
+                                <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                                    ${isDelivered && !isConfirmed ? `
+                                        <button class="btn btn-primary btn-sm" onclick="confirmDelivery(${o.orderid})">Confirm Delivery</button>
+                                    ` : ''}
+                                    ${isConfirmed ? `
+                                        <span style="font-size:12px; color:var(--success); font-weight:600; align-self:center;">✓ Delivery Confirmed</span>
+                                    ` : ''}
+                                    <button class="btn btn-secondary btn-sm" onclick="openComplaintModal(${o.orderid})">File Complaint</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="font-size:13px; color:var(--danger);">Failed to load orders.</div>';
+            }
+        }
+
+        async function confirmDelivery(orderId) {
+            const res = await fetch('api/checkout.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'confirm_delivery', orderid: orderId })
+            });
+            const data = await res.json();
+            showToast(data.message, data.success ? 'success' : 'error');
+            loadUserOrders();
+        }
+
+        function openComplaintModal(orderId) {
+            document.getElementById('actionModalTitle').textContent = `Submit Complaint for Order #${orderId}`;
+            document.getElementById('actionModalBody').innerHTML = `
+                <form onsubmit="submitComplaint(event, ${orderId})">
+                    <div class="form-group">
+                        <label class="form-label">Describe your issue *</label>
+                        <textarea id="complaintMsg" class="form-control" rows="3" required placeholder="Tell us what went wrong..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Submit Complaint</button>
+                </form>
+            `;
+            document.getElementById('actionModal').classList.remove('hidden');
+        }
+
+        async function submitComplaint(e, orderId) {
+            e.preventDefault();
+            const message = document.getElementById('complaintMsg').value.trim();
+            const res = await fetch('api/complaints.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add', orderid: orderId, message })
+            });
+            const data = await res.json();
+            showToast(data.message, data.success ? 'success' : 'error');
+            closeActionModal();
+        }
+
+        function closeActionModal() {
+            document.getElementById('actionModal').classList.add('hidden');
+        }
+
         function openAddressModal(address = null) {
             document.getElementById('addressModal').classList.remove('hidden');
             if (address) {
@@ -217,7 +324,7 @@ $user =$_SESSION['user'];
             document.getElementById('addressModal').classList.add('hidden');
         }
 
-        function showToast(msg, type = 'normal') {
+        function showToast(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
             if (!container) return;
             const toast = document.createElement('div');
