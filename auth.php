@@ -160,6 +160,34 @@ if ($action === 'register') {
     }
 }
 
+// ======================== UPDATE USER PROFILE ========================
+if ($action === 'update_profile') {
+    if (!isset($_SESSION['user']['userid'])) {
+        sendJsonResponse(['success' => false, 'message' => 'Authentication required.'], 401);
+    }
+
+    $userId = (int)$_SESSION['user']['userid'];
+    $firstName = trim($input['firstName'] ?? '');
+    $lastName = trim($input['lastName'] ?? '');
+
+    if (empty($firstName) || empty($lastName)) {
+        sendJsonResponse(['success' => false, 'message' => 'First and last name are required.'], 400);
+    }
+
+    $stmt = $pdo->prepare("UPDATE Users SET firstName = ?, lastName = ? WHERE userid = ?");
+    $stmt->execute([$firstName, $lastName, $userId]);
+
+    // Update session data
+    $_SESSION['user']['firstName'] = $firstName;
+    $_SESSION['user']['lastName'] = $lastName;
+
+    sendJsonResponse([
+        'success' => true,
+        'message' => 'Profile updated successfully!',
+        'user'    => $_SESSION['user']
+    ]);
+}
+
 // ======================== USER LOGOUT ========================
 if ($action === 'logout') {
     unset($_SESSION['user']);
